@@ -1,0 +1,46 @@
+// .loader-container{
+//     position: absolute;
+//     height: 100%;
+//     width: 100%;
+//     background: black;
+//     opacity: 0.7;
+//     z-index: 99;
+// }
+
+.spotForm .mat-form-field-wrapper {
+    padding-bottom: 0px;
+}
+
+.p-10 {
+    padding: 10px;
+}
+
+.p-t-10 {
+    padding-top: 10px;
+}
+
+.p-l-10 {
+    padding-left: 10px;
+}
+
+.p-r-10 {
+    padding-right: 10px;
+}
+
+.mat-standard-chip .mat-chip-remove {
+    border: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    padding: 0;
+    background: none;
+}
+
+.mat-standard-chip .mat-chip-remove.mat-icon, .mat-standard-chip .mat-chip-remove .mat-icon {
+    width: 18px;
+    height: 18px;
+    font-size: 18px;
+}
+
+.defaultOptions {
+    font-weight: 500;
+}

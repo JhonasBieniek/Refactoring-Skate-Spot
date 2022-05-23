@@ -1,0 +1,104 @@
+<!--<div class="video-container" *ngIf="!error && captures.length < maxImgs">
+    <button mat-mini-fab aria-label="capture" class="capture-cam" id="cam_capture" (click)="capture()" type="button" *ngIf="!disabled">
+        <mat-icon>camera</mat-icon>
+    </button>
+    <!-- <button mat-mini-fab aria-label="capture" class="capture-cam-rotate" id="flip_cam" (click)="changeCam()" type="button">
+        <mat-icon>flip_camera_android</mat-icon>
+    </button> -->
+    <!--<video #video id="video" class="cam-video" autoplay ></video>
+    <canvas style="display: none;" #canvas id="canvas" [width]="WIDTH" [height]="HEIGHT"></canvas>
+</div> -->
+<div class="snap-container" >
+    <button mat-fab color="primary" type="button" aria-label="upload button" (click)="fileInput.click()">
+        <mat-icon>photo_camera</mat-icon>
+    </button>
+    <input hidden #fileInput id="fileInput" type="file" accept="image/*" capture (change)="selectFiles($event)">
+</div>
+
+<div class="snap-container">
+    
+
+    <div *ngIf="captures.length == maxImgs">
+        Maximum photos reached !
+    </div>
+
+    <div *ngIf="error">
+        {{ error }}
+        <!-- <div class="mt-5">
+            <img src="https://trungk18.com/7e0976255739e721501803ee074f1f94/camera.gif" />
+        </div> -->
+    </div>
+</div>
+
+
+
+<fieldset class="Produtos" *ngIf="!error">
+    <legend><span>Photos: {{captures.length}} / {{maxImgs}} </span></legend>
+</fieldset>
+
+<div class="gallery" id="gallery" *ngIf="!error">
+    <div *ngFor="let src of captures; let i = index" class="gallery-item" id="gallery-item-{{i}}" (click)="imageResize(i)">
+        <div class="content">
+            <div class="image-container">
+                <img [src]="src">
+                <button mat-mini-fab aria-label="close" color="warn" class="close my-fab" (click)="remove(i)">
+                    <mat-icon class="my-fab-icon">close</mat-icon>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<fieldset class="Produtos" *ngIf="!error">
+    <legend><span>Spot Details</span></legend>
+</fieldset>
+
+<section class="p-10 p-b-20"  *ngIf="!error">
+    <form [formGroup]="form" class="form">
+        <div fxLayout="row wrap">
+            <div fxFlex="75" class="p-r-10 p-l-10">
+                <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Street</mat-label>
+                    <input matInput required placeholder="street" formControlName="route" >
+                </mat-form-field>
+            </div>
+            <div fxFlex="25" class="p-r-10">
+                <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Numero</mat-label>
+                    <input matInput placeholder="Numero" formControlName="street_number" >
+                </mat-form-field>
+            </div>
+            <div fxFlex="33" class="p-l-10 p-r-10">
+                <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>City</mat-label>
+                    <input matInput placeholder="Reference Point" formControlName="city" >
+                </mat-form-field>
+            </div>
+            <div fxFlex="33" class="p-r-10">
+                <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>State</mat-label>
+                    <input matInput placeholder="Reference Point" formControlName="state" >
+                </mat-form-field>
+            </div>
+            <div fxFlex="33" style="padding-right: 5px;">
+                <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Country</mat-label>
+                    <input matInput placeholder="Reference Point" formControlName="country" >
+                </mat-form-field>
+            </div>
+            <div fxFlex="100" class="p-l-10 p-r-10">
+                <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Reference Point</mat-label>
+                    <input matInput placeholder="Reference Point" formControlName="point_of_interest" >
+                </mat-form-field>
+            </div>
+            <div fxFlex="100" style="text-align: end; padding-right: 20px;" *ngIf="!loading">
+                <button mat-raised-button type="button" (click)="requestPosition();" class="m-r-10">Get Current Position</button>
+                <button mat-raised-button type="button" (click)="SpotSubmit()" >Go to Spot</button>
+            </div>
+            <div fxFlex="100" *ngIf="loading">
+                <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+            </div>
+        </div>
+    </form>
+</section>

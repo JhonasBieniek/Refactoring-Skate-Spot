@@ -1,0 +1,55 @@
+<div fxLayout="row wrap">
+    <div fxFlex.gt-md="100" fxFlex="100">
+        <div class="authBlock" fxLayout="row wrap">
+            <h3 style="text-align: center;">Sign In</h3>
+            <form [formGroup]="form" fxFlex="100">
+                <div fxLayout="row wrap">
+                    <div class="formGroup" fxFlex="100">
+                        <mat-form-field appearance="outline" style="width: 100%;">
+                            <mat-label>Email</mat-label>
+                            <input matInput required placeholder="Email" formControlName="email">
+                            <mat-error *ngIf="form.controls['email'].hasError('email') && !form.controls['email'].hasError('required')">
+                                Please enter a valid email address
+                            </mat-error>
+                            <mat-error *ngIf="form.controls['email'].hasError('required')">
+                                Email is <strong>required</strong>
+                            </mat-error>
+                        </mat-form-field>
+                    </div>
+
+                    <div class="formGroup" fxFlex="100">
+                        <mat-form-field appearance="outline" style="width: 100%;">
+                            <mat-label>Password</mat-label>
+                            <input matInput required placeholder="Password" type="password" formControlName="password">
+                            <mat-error *ngIf="form.controls['email'].hasError('required')">
+                                Password is <strong>required</strong>
+                            </mat-error>
+                        </mat-form-field>
+                    </div>
+
+                    <div fxFlex="100" *ngIf="errorMessage != ''" style="text-align: center;">
+                        <span style="font-size: 12px; color: red;">
+                            {{errorMessage}}
+                        </span>
+                    </div>
+
+                    <div class="formGroup" fxFlex="100">
+                        <button mat-raised-button color="primary" (click)="signIn();" style="width: 100%;" [disabled]="!form.valid">Log In</button>
+                    </div>
+                </div>
+            </form>
+            <div class="formGroup" fxFlex="100" style="text-align: center; margin-top: 10px; margin-bottom: 10px;">
+                <span class="or"><span class="orInner">Or</span></span>
+            </div>
+
+            <div class="forgotPassword" fxFlex="100">
+                <span (click)="forgotPassword();">Forgot Password?</span>
+            </div>
+        </div>
+
+        <div class="redirectToLogin" fxFlex="100">
+            <span>Don't have an account?<span class="redirect" (click)="register();"> Sign Up</span></span>
+        </div>
+
+    </div>
+</div>

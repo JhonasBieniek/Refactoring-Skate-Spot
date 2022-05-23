@@ -1,0 +1,54 @@
+<div fxLayout="row wrap">
+    <div fxFlex="100" style="margin-bottom: -40px;">
+        <button mat-icon-button class="close-button" align="end" [mat-dialog-close]="true">
+            <mat-icon class="close-icon" color="warn">close</mat-icon>
+        </button>
+    </div>
+    <div fxFlex.gt-md="100" fxFlex="100" cdkFocusInitial>
+        <div fxLayout="row wrap">
+            <div fxFlex="100" style="text-align: center; padding: 10px 10px 0 10px;">
+                <h2>Review</h2>
+            </div>
+            <div fxFlex="100" style="display: flex; justify-content: center; align-items: center;">
+                <fieldset class="rating">
+                    <ng-container *ngFor="let num of [5, 4, 3, 2, 1]">
+
+                        <input [id]="'star'+num" [value]="num"
+                            [class]="num <= form.controls['ratingValue'].value ? 'active' : 'inactive'" name="rating"
+                            type="radio" />
+
+                        <label (click)="starHandler(num)" class="full" [for]="'star'+num"></label>
+
+                    </ng-container>
+                </fieldset>
+            </div>
+            <!-- <form fxFlex="100" [formGroup]="form">
+                <div fxLayout="row wrap">
+                    <div fxFlex="100" class="p-l-10 p-r-10 p-t-10">
+                        <label>Leave a comment</label>
+                        <mat-form-field appearance="outline" class="full-width">
+                            <input matInput placeholder="comment about your experience (optional)"
+                                formControlName="review">
+                        </mat-form-field>
+                    </div>
+                    <div fxFlex="100" class="p-l-10 p-r-10">
+                        <button mat-raised-button (click)="save()" [disabled]="form.controls['ratingValue'].value == 0"
+                            style="width: 100%;">
+                            Add Review
+                        </button>
+                    </div>
+                </div>
+            </form> -->
+        </div>
+    </div>
+    <!-- <mat-divider fxFlex="100" style="margin-top: 10px;"></mat-divider>
+    <div fxFlex="100" class="p-10">
+        <mat-list>
+            <mat-list-item *ngFor="let star of data.stars">
+                <mat-icon mat-list-icon>person_outline</mat-icon>
+                <div mat-line>{{star.value}} <mat-icon style="color: #ffd700; font-size: 13px;">star</mat-icon></div>
+                <div mat-line>{{star.comment}}</div><mat-divider></mat-divider>
+            </mat-list-item>
+        </mat-list>
+    </div> -->
+</div>

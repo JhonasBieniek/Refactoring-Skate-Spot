@@ -1,0 +1,79 @@
+@import url(//netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.css);
+
+fieldset, label { 
+  //margin: 0; 
+  padding: 0; 
+}
+body{ margin: 20px; }
+h1 { font-size: 1.5em; margin: 10px; }
+
+.rating { 
+  border: none;
+  float: left;
+  cursor: pointer;
+  //margin-left: -5px ;
+  //line-height: 9px;
+}
+
+.full,.half {
+  cursor: pointer;
+}
+
+.avgRating {
+  float: left;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  //margin-right: 10px;
+  line-height: 22px;
+  //min-width: 25px;
+}
+
+.starLength {
+  //margin-top: -10px;
+  //font-size: 13px;
+  //color: gray;
+  //cursor: pointer;
+  /* font-weight: 500; */
+  float: right;
+}
+
+.starLength:after{
+  margin: 5px;
+  font-size: 1.25em;
+  font-family: FontAwesome;
+  //display: inline-block;
+  content: "\f005";
+  color: #FFD700;
+}
+
+.rating > input { display: none; } 
+.rating > label:before { 
+  margin: 5px;
+  font-size: 1.25em;
+  font-family: FontAwesome;
+  //display: inline-block;
+  content: "\f005";
+}
+
+.rating > .half:before { 
+  content: "\f089";
+  margin-right: -15px;
+  //position: absolute;
+}
+
+.rating > label { 
+  color: #ddd; 
+  float: right; 
+}
+
+.rating > input.active ~ label{ color: #FFD700;  }
+
+.rating > input.active ~ label,
+.rating:not( input.active) > label:hover, 
+.rating:not( input.active) > label:hover ~ label { color: #FFD700;  } 
+
+.rating > input.active + label:hover, 
+.rating > input.active ~ label:hover,
+.rating > label:hover ~ input.active ~ label,  selection 
+.rating > input.active ~ label:hover ~ label { color: #FFED85;  } 

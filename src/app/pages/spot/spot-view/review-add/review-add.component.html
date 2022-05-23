@@ -1,0 +1,30 @@
+<div fxLayout="row wrap">
+    <div fxFlex="100" style="margin-bottom: -40px;">
+        <button mat-icon-button class="close-button" align="end" [mat-dialog-close]="true">
+            <mat-icon class="close-icon" color="warn">close</mat-icon>
+        </button>
+    </div>
+    <div fxFlex.gt-md="100" fxFlex="100" cdkFocusInitial>
+        <div fxLayout="row wrap">
+            <div fxFlex="100" style="text-align: center; padding: 10px 10px 0 10px;">
+                <h2>Review</h2>
+            </div>
+            <form fxFlex="100" [formGroup]="form">
+                <div fxLayout="row wrap">
+                    <div fxFlex="100" class="p-l-10 p-r-10 p-t-10">
+                        <label>Leave a comment</label>
+                        <mat-form-field appearance="outline" class="full-width" >
+                            <textarea matInput placeholder="comment about your experience"
+                                formControlName="review" cdkAutosizeMinRows="2" cdkAutosizeMaxRows="6" cdkTextareaAutosize></textarea>
+                        </mat-form-field>
+                    </div>
+                    <div fxFlex="100" class="p-l-10 p-r-10">
+                        <button mat-raised-button color="primary" (click)="save()" [disabled]="!form.valid" class="full-width">
+                            Add Review
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,273 @@
+<div *ngIf="disabled" class="loader-container">
+    <mat-spinner ></mat-spinner>
+</div>
+<div fxLayout="row wrap" class="map-container">
+    <div fxFlex.gt-md="100" fxFlex="100">
+        <div fxLayout="row wrap" style="height: 100%; max-height: 100%;">
+            <div fxFlex="100" class="map-container" id="map" *ngIf="center != null"> <!--*ngIf="apiLoaded | async" -->
+                <google-map [options]="mapOptions" [center]="center" width="100%" height="100%" (mapDrag)="clearDivs();"
+                    (mapClick)="click($event)" (mapRightclick)="rightClick($event);">
+                    <!-- Serach Input-->
+                    <div class="search-container mat-elevation-z10" id="searchBar"
+                        style="border-top-left-radius: 12px; border-top-right-radius:12px">
+                        <form [formGroup]="form">
+                            <mat-card class="card-focus">
+                                <mat-card-content class="column">
+                                    <div class="input-container">
+                                        <mat-form-field appearance="outline" class="search-input">
+                                            <input matInput placeholder="Search" formControlName="search" class="input-size"
+                                                name="locationName" autocomplete="off"
+                                                #searchInput (keyup)="search(searchInput.value)">
+                                            <span matPrefix>
+                                                <mat-icon style="padding-left: 10px;">search</mat-icon>
+                                                
+                                            </span>
+                                            <button mat-button *ngIf="form.controls['search'].value && !searching" matSuffix
+                                                mat-icon-button (click)="clear('search')" type="button">
+                                                <mat-icon>close</mat-icon>
+                                            </button>
+                                            <mat-spinner matSuffix *ngIf="searching" [diameter]="20"></mat-spinner>
+                                        </mat-form-field>
+                                        <button mat-icon-button type="button" (click)="searchEnter(searchInput.value)">
+                                            <mat-icon>search</mat-icon>
+                                        </button>
+                                        <button mat-icon-button aria-label="Advanced menu" *ngIf="!showAdvanced" type="button" (click)="showAdvanced=!showAdvanced; changeMarks()" matTooltip="Advanced menu">
+                                            <mat-icon>list</mat-icon>
+                                        </button>
+                                        <button mat-icon-button aria-label="Advanced menu" *ngIf="showAdvanced && this.spots$.length === 0" type="button" (click)="showAdvanced=!showAdvanced" matTooltip="Advanced menu">
+                                            <mat-icon>close</mat-icon>
+                                        </button>
+                                        <button mat-icon-button aria-label="Advanced menu" *ngIf="showAdvanced && this.spots$.length !== 0 " type="button" (click)="showAdvanced=!showAdvanced; this.spots$ = [];" matTooltip="Advanced menu">
+                                            <mat-icon>close</mat-icon>
+                                        </button>
+                                    </div>
+                                    <div class="advanced">
+                                        <!-- <div class="advanced-button" *ngIf="!showAdvanced"><span
+                                                (click)="showAdvanced=!showAdvanced">advanced</span></div> -->
+                                        <!-- <div class="advanced-button" ><span
+                                            (click)="getViewCenter()">getViewCenter</span></div> -->
+                                        <div class="advanced-menu" *ngIf="showAdvanced" style="padding-top: 10px;">
+                                            <section class="condition-options">
+                                                <label style="float: left;">Distance (Km)</label>
+                                                <!-- <mat-checkbox  [(ngModel)]="location" [ngModelOptions]="{standalone: true}" style="float: right;">Search by location</mat-checkbox> -->
+                                            </section>
+                                            
+                                            <mat-slider thumbLabel tickInterval="1" step="1" min="1" max="30"
+                                                aria-label="units" formControlName="kmDistance"></mat-slider> 
+                                                <!--upgradeSpotsByDistance()   opcao para filtrar spots no mapa-->
+                                            <section class="condition-options">
+                                                <span class="example-list-section">
+                                                    <ul>
+                                                        <li *ngFor="let condition of conditions" (click)="changeMarks()">
+                                                            <mat-checkbox [(ngModel)]="condition.selected"
+                                                                [ngModelOptions]="{standalone: true}">
+                                                                {{condition.name | titlecase }}
+                                                            </mat-checkbox>
+                                                        </li>
+                                                    </ul>
+                                                </span>
+                                            </section>
+                                            <div class="advanced-button" *ngIf="showAdvanced">
+                                                <span (click)="this.spots$ = []; clearConditions()">Clear</span> <!--showAdvanced=!showAdvanced;-->
+                                                <!-- <button mat-raised-button color="primary" (click)="changeMarks()">GO</button> -->
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <mat-divider *ngIf="this.spots$.length > 0 || searching || searchResult.length > 0"></mat-divider>
+                                    <div style="width: 100%;" *ngIf="this.spots$.length > 0 || searching || searchResult.length > 0">
+                                        <mat-progress-bar mode="indeterminate" *ngIf="searching" class="p-t-10"></mat-progress-bar>
+                                        <mat-list class="search-list" *ngIf="this.spots$.length > 0 || searchResult.length > 0">
+                                            <!--<div mat-subheader>Folders</div> -->
+                                            <div mat-subheader *ngIf="searchResult.length > 0" style="height: 24px;">Autocomplete</div>
+                                            <mat-list-item *ngFor="let autocomplete of searchResult" style="cursor: pointer; font-size: 14px; height: 28px !important;" (click)="autoCompleteSelect(autocomplete)"> <!-- [routerLink]="['/spot/view', spot.uid]" -->
+                                                <div mat-line >{{autocomplete.description}}</div>
+                                                <mat-divider></mat-divider>
+                                            </mat-list-item>
+                                            <div mat-subheader *ngIf="this.spots$.length > 0" style="height: 24px;" >Spots</div>
+                                            <mat-list-item *ngFor="let spot of this.spots$" style="cursor: pointer;" (click)="setPosition(spot)"> <!-- [routerLink]="['/spot/view', spot.uid]" -->
+                                                <img *ngIf="spot.thumbnail?.downloadURL" matListAvatar src="{{spot.thumbnail.downloadURL}}" alt="avatar" >
+                                                <img *ngIf="spot.thumbnail == null" matListAvatar >
+                                                <!--
+                                                    <img *ngIf="spot.pictures" matListAvatar src="{{spot.pictures[0]}}" alt="avatar" >
+                                                    <div *ngIf="spot.pictures"><img src="{{spot.pictures[0]}}" alt="teste" width="24px" height="24px"></div> -->
+                                                <div mat-line class="spot-name">{{spot.name}}</div>
+                                                <div mat-line class="spot-address">{{spot.address.route}}</div>
+                                                <mat-divider></mat-divider>
+                                            </mat-list-item>
+                                            <!--<ul>
+                                            <li *ngFor="let spot of this.spots$">
+                                                Spot Name: {{spot.name}} - Adress : {{spot.address[1].short_name}} </li>
+                                        </ul>-->
+                                        </mat-list>
+
+                                    </div>
+                                </mat-card-content>
+                            </mat-card>
+                        </form>
+                    </div>
+                    <!-- Left Menu -->
+                    <!--<div class="maps-menu mat-elevation-z10"
+                        style="border-top-left-radius: 12px; border-top-right-radius:12px">
+                        <mat-card class="menu-card">
+                            <mat-card-content>
+                                <div fxLayout="row wrap">
+                                    <div fxFlex="15" div fxLayout="column" fxLayoutAlign="center center" class="header-menu">
+                                        <button mat-button type="button" class="menu-button" (click)="toggleRightSidenav()">
+                                            <mat-icon>menu</mat-icon>
+                                        </button>
+                                    </div>
+                                    <div class="card-menu-title" fxFlex="85" style="margin-top: 5px; margin-bottom: 10px;">
+                                        Instruções de Destino
+                                    </div>
+                                    <div fxFlex="100" fxLayout="row wrap" >
+                                        <form [formGroup]="form" fxFlex="100" >
+                                            <div fxLayout="row wrap">
+                                                <div fxFlex="15" fxLayout="row wrap">
+                                                    <div fxFlex="100" div fxLayout="column" fxLayoutAlign="center center">
+                                                        <mat-icon color="primary" style="cursor:pointer;" (click)="getReverseGeocodingData('start_location')">my_location</mat-icon>
+                                                    </div>
+                                                    <div fxFlex="100" div fxLayout="column" fxLayoutAlign="center center">
+                                                        <mat-icon color="warn" style="cursor:pointer;" (click)="getReverseGeocodingData('end_location')">fmd_good</mat-icon>
+                                                    </div>
+                                                </div>
+                                                <div fxFlex="85" fxLayout="row wrap">
+                                                    <div fxFlex="90" fxLayout="row wrap">
+                                                        <mat-form-field appearance="outline" fxFlex="100">
+                                                            <mat-label>Escolha o Ponto de Partida</mat-label>
+                                                            <input matInput placeholder="Escolha o Ponto de Partida" formControlName="start_location">
+                                                            <button mat-button *ngIf="form.controls['start_location'].value" matSuffix mat-icon-button (click)="clear('start_location')">
+                                                                <mat-icon>close</mat-icon>
+                                                            </button>
+                                                        </mat-form-field>
+                                                        <mat-form-field appearance="outline" fxFlex="100">
+                                                            <mat-label>Escolha o Ponto de Destino</mat-label>
+                                                            <input matInput placeholder="Escolha o Ponto de Destino" formControlName="end_location">
+                                                            <button mat-button *ngIf="form.controls['end_location'].value" matSuffix mat-icon-button (click)="clear('end_location')">
+                                                                <mat-icon>close</mat-icon>
+                                                            </button>
+                                                        </mat-form-field>
+                                                    </div>
+                                                    <div fxFlex="10" style="margin: auto; font-size: 2em;">
+                                                        <mat-icon  style="cursor: pointer;" (click)="reverseLocation();">swap_vert</mat-icon>
+                                                    </div>
+                                                </div>
+                                                <div fxFlex="100" style="text-align: center;">
+                                                    <button mat-raised-button color="primary" class="menu-button">
+                                                        Buscar
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </mat-card-content>
+                        </mat-card>
+                    </div> -->
+                    <!--Left Menu End -->
+
+                    <!-- Login Button 
+                    <div class="login-buton" *ngIf="authService.getUser() == null">
+                        <button mat-raised-button color="primary" (click)="openBottomSheet()">Log In</button>
+                    </div>
+                    <End Login Button -->
+
+                    <!-- Location Button -->
+                    <div class="location-button">
+                        <button mat-mini-fab color="white" (click)="requestPositionAtual();">
+                            <mat-icon>gps_fixed</mat-icon>
+                        </button>
+                    </div>
+
+                    <!-- End location Button -->
+
+                    <!-- RightClick Options -->
+                    <!-- <div class="rcOptions"
+                        [ngStyle]="{'display': rcOptionsTS.display, 'top': rcOptionsTS.top, 'left': rcOptionsTS.left }">
+                        <div class="rcOptions__header">
+                            {{rcOptionsTS.address}}
+                        </div>
+                        <mat-list class="rcOptions__actions">
+                            <mat-list-item (click)="newSpot()">Cadastrar Spot</mat-list-item>
+                            <mat-divider></mat-divider>
+                            <mat-list-item>Definir como Destino</mat-list-item>
+                        </mat-list>
+
+                    </div> -->
+                    <!-- End RightClick Options -->
+                    <map-marker #markerElem="mapMarker" *ngFor="let marker of markers" [position]="marker.position" [label]="marker.label"
+                        [title]="marker.title" [options]="marker.options" (mapClick)="openInfo(markerElem, marker.info)" >
+                    </map-marker>
+
+                    <map-info-window>
+                        <div class="rcOptions__body" *ngIf="infoContent == null">
+                            <span (click)="getViewCenter(); newSpot();" id="newSpot" > Add new Spot here?</span>
+                        </div>
+                        <div *ngIf="infoContent != null" class="spot-container">
+                                <img [src]="infoContent.thumbnail.downloadURL" class="info-img" alt="spot cover" *ngIf="infoContent.thumbnail != null">
+
+                            <div class="info-img" *ngIf="infoContent.thumbnail == null" >
+                                <!-- <img class="info-img" *ngIf="infoContent.pictures" src="{{infoContent.pictures[0]}}" alt="avatar"> -->
+                            </div>
+                            <div class="marker-content p-l-10">
+                                <p class="marker-title resize" ><span cdkFocusInitial>Spot: </span>{{infoContent?.name}}</p>
+                                <p class="marker-text resize"><span>Address: </span>{{infoContent?.address.route}}</p>
+                                <p class="marker-view"><span [routerLink]="['/spot/view', infoContent.uid]" (click)=getViewCenter()>Visualizar Spot</span></p>
+                            </div>
+                        </div>
+                    </map-info-window >
+
+                    <!-- <map-polygon [paths]="vertices" [options]="PolygonOptions"></map-polygon> -->
+ 
+                </google-map>
+            </div>
+            <div fxFlex="100" *ngIf="getError != ''" >
+                <div fxLayout="row" fxLayoutAlign="center center" class="map-container">
+                    <div fxFlex="100">
+                        <section class="text-center">
+                            <h3>{{getError}}</h3>
+                            <label>try these steps to fix the problem, then reload the page.</label>
+                        </section>
+
+                        <section class="text-center" *ngIf="platform.IOS">
+                            <div class="error-gallery" id="error-gallery">
+                                <div class="error-gallery-item">
+                                    <div class="image-container">
+                                        <img [src]="'./assets/images/permissions/ios.gif'">
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- <div class="gallery" id="gallery">
+                                <div class="gallery-item">
+                                    <div class="image-container">
+                                        <img [src]="'./assets/images/permissions/IOS-1.png'">
+                                    </div>
+                                </div>
+                                <div class="gallery-item">
+                                    <div class="image-container">
+                                        <img [src]="'./assets/images/permissions/IOS-2.png'">
+                                    </div>
+                                </div>
+                            </div> -->
+                        </section>
+
+                        <section class="text-center" *ngIf="platform.ANDROID">
+                            <div class="error-gallery" id="error-gallery">
+                                <div class="error-gallery-item">
+                                    <div class="image-container">
+                                        <img [src]="'./assets/images/permissions/android.gif'">
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+
+                        <section class="text-center m-t-20" *ngIf="!platform.ANDROID && !platform.IOS" >
+                            Enable Geolocation !
+                        </section>
+
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+    </div>
+</div>

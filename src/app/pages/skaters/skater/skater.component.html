@@ -1,0 +1,210 @@
+<div *ngIf="disabled" class="loader-container">
+    <mat-spinner ></mat-spinner>
+</div>
+<div fxLayout="row wrap">
+    <div fxFlex.gt-md="100" fxFlex="100">
+        <div fxLayout="row wrap">
+            <!-- <div fxFlex="50" style="text-align: left; padding: 10px 10px 0 10px;">
+                <h2>Skater View</h2>
+            </div>
+            <div fxFlex="50" style="text-align: right" class="p-10">
+                <button mat-raised-button style="margin-right: 5px;" [routerLink]="'/'">
+                    Cancel
+                </button>
+                <button mat-raised-button style="margin-left: 5px; margin-right: 10px;"
+                    *ngIf="readonly == true && user?.uid == skater?.user_uid" (click)="readonly=!readonly">
+                    Edit
+                </button>
+
+                <button mat-raised-button style="margin-left: 5px; margin-right: 10px;" *ngIf="readonly == false"
+                    (click)="save()">
+                    save
+                </button>
+            </div> -->
+            <form [formGroup]="form" fxFlex="100" class="p-t-10">
+                <div fxLayout="row wrap" class="userForm">
+                    <div fxFlex.xs="100" fxFlex.gt-xs="30" class="p-l-10 p-r-10">
+                        <mat-form-field appearance="outline" class="full-width">
+                            <mat-label>Name</mat-label>
+                            <input matInput placeholder="Name" formControlName="name" #name [readonly]="sharedService.readonly">
+                        </mat-form-field>
+                    </div>
+                    <div fxFlex.xs="100" fxFlex.gt-xs="30" class="p-l-10 p-r-10">
+                        <mat-form-field appearance="outline" class="full-width">
+                            <mat-label>Nickname</mat-label>
+                            <input matInput placeholder="Name" formControlName="nickname" [readonly]="sharedService.readonly">
+                        </mat-form-field>
+                    </div>
+                    <div fxFlex.xs="50" fxFlex.gt-xs="20" class="p-l-10 p-r-10">
+                        <mat-form-field appearance="outline" class="full-width">
+                            <mat-label>City</mat-label>
+                            <input matInput placeholder="City" formControlName="city" [readonly]="sharedService.readonly">
+                        </mat-form-field>
+                    </div>
+                    <div fxFlex.xs="50" fxFlex.gt-xs="20" class="p-l-10 p-r-10">
+                        <mat-form-field appearance="outline" class="full-width">
+                            <mat-label>Country</mat-label>
+                            <input matInput placeholder="Country" formControlName="country" [readonly]="sharedService.readonly">
+                        </mat-form-field>
+                    </div>
+                    <div fxFlex="100" class="p-l-10 p-r-10">
+                        <mat-form-field appearance="outline" class="full-width">
+                            <mat-label>Biography</mat-label>
+                            <textarea matInput formControlName="bio" placeholder="Ex. I've been skateboarding for 5 years ...."></textarea>
+                        </mat-form-field>
+                    </div>
+                    <mat-divider fxFlex="100"></mat-divider>
+                    <div fxFlex="100">
+                        <h2 class="p-l-10">Skate Setup</h2>
+                    </div>
+                    <div fxFlex="100" fxFlex.gt-md="34" class="p-l-10 p-r-10">
+                        <mat-form-field appearance="outline" class="full-width">
+                            <mat-label>Deck</mat-label>
+                            <input matInput placeholder="Deck" formControlName="deck" [readonly]="sharedService.readonly">
+                        </mat-form-field>
+                    </div>
+                    <div fxFlex="100" fxFlex.gt-md="33" class="p-l-10 p-r-10">
+                        <mat-form-field appearance="outline" class="full-width">
+                            <mat-label>Truck</mat-label>
+                            <input matInput placeholder="Truck" formControlName="truck" [readonly]="sharedService.readonly">
+                        </mat-form-field>
+                    </div>
+                    <div fxFlex="100" fxFlex.gt-md="33" class="p-l-10 p-r-10">
+                        <mat-form-field appearance="outline" class="full-width">
+                            <mat-label>Wheel</mat-label>
+                            <input matInput placeholder="Wheel" formControlName="wheel" [readonly]="sharedService.readonly">
+                        </mat-form-field>
+                    </div>
+                    <div fxFlex="100" fxFlex.gt-md="33" class="p-l-10 p-r-10">
+                        <mat-form-field appearance="outline" class="full-width">
+                            <mat-label>Bearings</mat-label>
+                            <input matInput placeholder="Bearings" formControlName="bearings" [readonly]="sharedService.readonly">
+                        </mat-form-field>
+                    </div>
+                    <mat-divider fxFlex="100"></mat-divider>
+                    <div fxFlex="100">
+                        <h2 class="p-l-10">Favorite Skaters</h2>
+                    </div>
+                    <div fxFlex="100" class="p-l-10 p-r-10" *ngIf="sharedService.readonly == false">
+                        <mat-form-field appearance="outline" class="full-width">
+                            <mat-label>Favorite Skaters</mat-label>
+                            <mat-chip-list #chipList3 aria-label="Favorite Skaters list">
+                                <mat-chip *ngFor="let pro of pros.value" [selectable]="selectable" [removable]="removable"
+                                    (removed)="removePro(pro)">
+                                    {{pro}}
+                                    <button matChipRemove *ngIf="removable">
+                                        <mat-icon>cancel</mat-icon>
+                                    </button>
+                                </mat-chip>
+                                <input placeholder="New Favorite Skater..." [matChipInputFor]="chipList3"
+                                    [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+                                    [matChipInputAddOnBlur]="addOnBlur" (matChipInputTokenEnd)="addPro($event)">
+                            </mat-chip-list>
+                        </mat-form-field>
+                        <!-- <mat-form-field appearance="outline" class="full-width">
+                            <mat-label>Favorite Skaters</mat-label>
+                            <mat-select formControlName="pros" multiple>
+                                <mat-option *ngFor="let pro of pros" [value]="pro.name">{{pro.name}}</mat-option>
+                            </mat-select>
+                        </mat-form-field> -->
+                    </div>
+                    <div fxFlex="100" class="p-l-10 p-r-10" *ngIf="sharedService.readonly == true" style="margin-top: -10px;">
+                        <ul style="list-style-type: none; padding-left: 0px">
+                            <li *ngFor="let skater of skater?.pros; let i = index" style="float: left; margin-right: 10px; display: flex;
+                                align-items: center;">
+                                <mat-icon style="color: green; height: 30px; width: 30px;">done</mat-icon>{{skater}}
+                            </li>
+                        </ul>
+                    </div>
+                    <mat-divider fxFlex="100"></mat-divider>
+                    <div fxFlex="100">
+                        <h2 class="p-l-10">Marketing</h2>
+                    </div>
+                    <div fxFlex="100" fxFlex.gt-md="50" class="p-l-10 p-r-10" *ngIf="sharedService.readonly == false">
+                        <mat-form-field appearance="outline" class="full-width">
+                            <mat-label>Sponsorships</mat-label>
+                            <mat-chip-list #chipList aria-label="Sponsorships list">
+                                <mat-chip *ngFor="let sponsorship of sponsorships.value" [selectable]="selectable" [removable]="removable"
+                                    (removed)="removeSponsorship(sponsorship)">
+                                    {{sponsorship}}
+                                    <button matChipRemove *ngIf="removable">
+                                        <mat-icon>cancel</mat-icon>
+                                    </button>
+                                </mat-chip>
+                                <input placeholder="New sponsorship..." [matChipInputFor]="chipList"
+                                    [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+                                    [matChipInputAddOnBlur]="addOnBlur" (matChipInputTokenEnd)="addSponsorship($event)">
+                            </mat-chip-list>
+                        </mat-form-field>
+                    </div>
+                    <div fxFlex="100" fxFlex.gt-md="50" class="p-l-10 p-r-10" *ngIf="sharedService.readonly == false">
+                        <mat-form-field appearance="outline" class="full-width">
+                            <mat-label>Brands</mat-label>
+                            <mat-chip-list #chipList2 aria-label="Brands list">
+                                <mat-chip *ngFor="let brand of brands.value" [selectable]="selectable" [removable]="removable"
+                                    (removed)="removeBrand(brand)">
+                                    {{brand}}
+                                    <button matChipRemove *ngIf="removable">
+                                        <mat-icon>cancel</mat-icon>
+                                    </button>
+                                </mat-chip>
+                                <input placeholder="New brand..." [matChipInputFor]="chipList2"
+                                    [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+                                    [matChipInputAddOnBlur]="addOnBlur" (matChipInputTokenEnd)="addBrand($event)">
+                            </mat-chip-list>
+                        </mat-form-field>
+                    </div>
+
+                    <div fxFlex="100" class="p-l-10 p-r-10" style="margin-top: -10px;" *ngIf="sharedService.readonly == true">
+                        <p class="defaultOptins">Sponsorships:</p>
+                        <ul style="list-style-type: none; padding-left: 0px; margin-top: -10px;" >
+                            <li *ngFor="let sponsorship of skater?.sponsorships; let i = index" style="float: left; margin-right: 10px; display: flex;
+                                align-items: center;">
+                                <mat-icon style="color: green; height: 30px; width: 30px;">done</mat-icon>{{sponsorship}}
+                            </li>
+                        </ul>
+                    </div>
+                    <div fxFlex="100" class="p-l-10 p-r-10" *ngIf="sharedService.readonly == true">
+                        <p class="defaultOptins">Brands:</p>
+                        <ul style="list-style-type: none; padding-left: 0px; margin-top: -10px;">
+                            <li *ngFor="let brand of skater?.brands; let i = index" style="float: left; margin-right: 10px; display: flex;
+                                align-items: center;">
+                                <mat-icon style="color: green; height: 30px; width: 30px;">done</mat-icon>{{brand}}
+                            </li>
+                        </ul>
+                    </div>
+                   <!-- <mat-divider fxFlex="100" *ngIf="instagramData.length > 0"></mat-divider> -->
+                    <!-- <a href="https://api.instagram.com/oauth/authorize?client_id=990602627938098&redirect_uri=https://www.dugong.com.br/skatesfera/#/&scope=user_profile,user_media&response_type=code" >login with instagram</a>-->
+                    <!-- <div fxFlex="100" *ngIf="instagramData.length > 0" fxLayout="row wrap">
+                        <div fxFlex="100">
+                            <h2 class="p-l-10">Insta Feed</h2>
+                        </div>
+                        <div class="instagram-gallery" fxFlex="33" style="padding: 5px;"  *ngFor="let insta of instagramData; let i = index">
+                            
+                            <img [src]="insta.media_url" *ngIf="insta.media_type == 'IMAGE'" style="width: 100%; height: 90%; object-fit: cover; object-position: top;">
+                            <video [src]="insta.media_url" *ngIf="insta.media_type == 'VIDEO'" style="width: 100%; height: 90%;" controls></video>
+                        </div>
+                    </div> -->
+                    <mat-divider fxFlex="100"></mat-divider>
+                    <div fxFlex="100">
+                        <h2 class="p-l-10">My Registered Places</h2>
+                    </div>
+                    <div *ngIf="spots != null">
+                        <p *ngFor="let spot of spots;" class="p-l-10 spots-edit">
+                            <mat-icon aria-hidden="false" aria-label="Edit this Spot" (click)="editSpot(spot.uid);" class="spot-edit-icon">edit</mat-icon> {{spot.name}}
+                        </p>
+                    </div>
+                    <mat-divider fxFlex="100"></mat-divider>
+                    <div fxFlex="100">
+                        <h2 class="p-l-10">My Favorite Spots</h2>
+                    </div>
+                    <div *ngIf="spots != null">
+                        <p *ngFor="let favorite of favorites_spots;" class="p-l-10">
+                            {{favorite.name}}
+                        </p>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

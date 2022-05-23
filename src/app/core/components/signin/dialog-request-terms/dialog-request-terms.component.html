@@ -1,0 +1,18 @@
+<div fxLayout="row wrap">
+    <div fxFlex.gt-md="100" fxFlex="100">
+        <div class="authBlock" fxLayout="row wrap">
+            <h3 style="text-align: center;" fxFlex="100">Read terms and conditions</h3>
+            <div fxFlex="100" class="p-b-10 terms-conditons">
+                <ul>
+                    <li *ngFor="let term of terms">
+                        <mat-checkbox [(ngModel)]="term.checked"></mat-checkbox><span (click)="showTerms(term);"> Terms and Conditions </span>
+                    </li>
+                </ul>
+            </div>
+            <!-- Calling SignIn Api from AuthService -->
+            <div class="text-center" fxFlex="100" >
+                <button mat-raised-button color="primary" style="margin-right: 10px;" (click)="save();" [disabled]="disabled">Agree</button>
+            </div>
+        </div>
+    </div>
+</div>

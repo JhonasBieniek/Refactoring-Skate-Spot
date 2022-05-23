@@ -1,0 +1,137 @@
+<div class="page-container">
+    <mat-sidenav-container class="sidenav-container">
+        <mat-sidenav #sidenav autoFocus="false" mode="over" [(opened)]="isMenuOpen" class="sidenav">
+            <div style="width: 100%; margin-bottom: 5px;">
+                <img src="./assets/icons/logo/logoskate.png" height="40px;" width="100px"
+                    style="padding-left: 24px; padding-top: 10px;">
+                <mat-icon style="cursor:pointer; float: right; margin-right: 15px; margin-top: 15px;"
+                    (click)="onSidenavClick()">keyboard_arrow_left</mat-icon>
+            </div>
+            <mat-divider></mat-divider>
+            <a mat-button routerLink="/">Home</a>
+            <!--<a mat-button routerLink="/spot">Spot</a>-->
+            <mat-divider></mat-divider>
+            <!-- <div style="margin-left: 24px; padding-top: 10px;" *ngIf="authService.getUser() != null">
+                <button mat-icon-button type="button" (click)="authService.logout(); onSidenavClick()" style="width: 100%; text-align: left;">
+                    <mat-icon>logout</mat-icon> Logout
+                </button>
+            </div>
+            <div class="login-buton-navbar" style="margin-left: 24px; padding-top: 10px;"
+                *ngIf="authService.getUser() == null">
+                <button mat-icon-button type="button" (click)="openBottomSheet(); onSidenavClick()" style="width: 100%; text-align: left;">
+                    <mat-icon>login</mat-icon> Log In
+                </button>
+            </div>
+            <div class="login-buton-navbar" style="margin-left: 24px; padding-top: 10px;">
+                <button mat-icon-button type="button" (click)="onSidenavClick()" routerLink="/skater" style="width: 100%; text-align: left;">
+                    <mat-icon>person</mat-icon> Profile
+                </button>
+            </div> -->
+        </mat-sidenav>
+        <mat-sidenav-content>
+                <div *ngIf="loaderservice.isLoading | async" class="loader-container">
+                    <mat-spinner style="top:50%; left:50%"></mat-spinner>
+                </div>
+                <div class="container">
+                    <div class="header">
+                        <h3 class="skate-header" *ngIf="navRouter.url === '/'">SkateBoardOnly</h3>
+                        <div *ngIf="navRouter.url !== '/'" >
+                            <div class="navbar-title">
+                                {{get_title()}}
+                            </div>
+                            <div style="float: right;" *ngIf="checkUrl('/spot')">
+                                <button mat-icon-button class="navbar-back" (click)="backPreviousUrl()">
+                                    <mat-icon>arrow_back</mat-icon>
+                                </button>
+                                <button mat-icon-button class="navbar-edit" (click)="spotEdit();" *ngIf="checkUrl('spot/view/') && (sharedService.currentSpotUser_uid === this.authService.user?.uid)">
+                                    <mat-icon>edit</mat-icon>
+                                </button>
+                                <button mat-icon-button class="navbar-close" [routerLink]="'/'" *ngIf="!checkUrl('/view/')">
+                                    <mat-icon>close</mat-icon>
+                                </button>
+                                <button mat-icon-button class="navbar-done" (click)="save($event);" *ngIf="!checkUrl('/view/')">
+                                    <mat-icon>done</mat-icon>
+                                </button>
+                            </div>
+                            <div style="float: right;" *ngIf="checkUrl('/skater')">
+                                <button mat-icon-button class="navbar-back" (click)="backPreviousUrl()">
+                                    <mat-icon>arrow_back</mat-icon>
+                                </button>
+                                <button mat-icon-button type="button" (click)="authService.logout();">
+                                    <mat-icon>logout</mat-icon>
+                                </button>
+                                <button mat-icon-button class="navbar-edit" *ngIf="sharedService.readonly" (click)="sharedService.readonly=!sharedService.readonly">
+                                    <mat-icon>edit</mat-icon>
+                                </button>
+                                <button mat-icon-button class="navbar-done" *ngIf="!sharedService.readonly" (click)="save($event);">
+                                    <mat-icon>done</mat-icon>
+                                </button>
+                            </div>
+                        </div>
+                        <!-- <nav>
+                            <a routerLink="/home" routerLinkActive="active">Home</a>
+                            <a routerLink="/about" routerLinkActive="active">About</a>
+                        </nav> -->
+                        <div class="menu-desktop d-flex flex-row" *ngIf="showDesktopIcon">
+                            <div class="login-buton-navbar" *ngIf="!checkUrl('/skater')">
+                                <button mat-icon-button type="button" routerLink="/skater"(click)="requestViewBounds(); setFunctionLogin()" id="profile" style="width: 100%; text-align: left;">
+                                    <mat-icon>person</mat-icon> Profile
+                                </button>
+                            </div>
+                            <div class="login-buton-navbar" *ngIf="checkUrl('/skater')">
+                                <button mat-icon-button type="button" routerLink="/" style="width: 100%; text-align: left;">
+                                    <mat-icon>home</mat-icon> Home
+                                </button>
+                            </div>
+                            <!-- <button mat-icon-button (click)="onSidenavClick()" type="button">
+                                <mat-icon>menu</mat-icon>
+                            </button> -->
+                            <!-- <button mat-icon-button type="button" id="searchBar" *ngIf="showSearchIcon()" (click)="showSearchBar()">
+                                <mat-icon *ngIf="!showSearch">search</mat-icon>
+                                <mat-icon *ngIf="showSearch">close</mat-icon>
+                            </button> -->
+                        </div>
+                    </div>
+                    <main class="content">
+                        <router-outlet ></router-outlet>
+                    </main>
+                    <div class="footer">
+                        <footer>
+                            <mat-toolbar class="toolbarNav">
+                                <button mat-flat-button routerLink="/" routerLinkActive="active-link" [routerLinkActiveOptions]="{ exact: true }">
+                                    <mat-icon class="material-icons color_blue"> home</mat-icon>
+                                    <!--<span>Top Artists</span>-->
+                                </button>
+                                <button mat-flat-button routerLink="/skater" routerLinkActive="active-link" (click)="requestViewBounds(); setFunctionLogin()" id="profile">
+                                    <mat-icon class="material-icons color_blue"> person</mat-icon>
+                                    <!--<span>Top Artists</span>-->
+                                </button>
+                                <button mat-flat-button *ngIf="navRouter.url == '/' " (click)="fileInputNavbar.click()"> <!--(click)="requestPosition()"-->
+                                    <mat-icon class="material-icons color_blue"> photo_camera </mat-icon>
+                                </button>
+                                <button mat-flat-button *ngIf="verifyUrl()" (click)="openCam()"> 
+                                    <mat-icon class="material-icons color_blue"> photo_camera </mat-icon>
+                                </button>
+                                <input hidden #fileInputNavbar id="fileInputNavbar" type="file" accept=".jpg,.png,.jpeg" (change)="requestViewBounds(); selectFiles($event)">
+                                <!-- <button mat-button (click)="onSidenavClick()" routerLinkActive="active-link">
+                                    <mat-icon class="material-icons color_blue"> menu</mat-icon>
+                                    <!--<span>History</span>
+                                </button> -->
+                            </mat-toolbar>
+            
+                            <!--<mat-menu #aboveMenu="matMenu" yPosition="above">
+                                <button mat-menu-item>Item 1</button>
+                                <button mat-menu-item>Item 2</button>
+                            </mat-menu>-->
+                        </footer>
+                    </div>
+                </div>
+
+
+                <!--<main class="mainPage">
+                    <router-outlet></router-outlet>
+                </main> -->
+                
+            </mat-sidenav-content>
+        </mat-sidenav-container>
+</div>

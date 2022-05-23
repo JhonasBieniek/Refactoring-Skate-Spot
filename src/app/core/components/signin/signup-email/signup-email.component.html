@@ -1,0 +1,77 @@
+<div fxLayout="row wrap">
+    <div fxFlex.gt-md="100" fxFlex="100">
+        <div class="authBlock" fxLayout="row wrap">
+            <h3 style="text-align: center;">Sign Up</h3>
+            <form [formGroup]="form" fxFlex="100">
+                <div fxLayout="row wrap">
+                    <div class="formGroup" fxFlex="100">
+                        <mat-form-field appearance="outline" style="width: 100%;">
+                            <mat-label>Name</mat-label>
+                            <input matInput required placeholder="Name" formControlName="name">
+                            <mat-error *ngIf="form.controls['name'].hasError('required')"> Name is <strong>required</strong></mat-error>
+                            <mat-error *ngIf="form.controls['name'].hasError('minlength')"> Name have at least 5 characters </mat-error>
+                        </mat-form-field>
+                    </div>
+
+                    <div class="formGroup" fxFlex="100">
+                        <mat-form-field appearance="outline" style="width: 100%;">
+                            <mat-label>Email</mat-label>
+                            <input matInput required placeholder="Email" formControlName="email">
+                            <mat-error *ngIf="form.controls['email'].hasError('email') && !form.controls['email'].hasError('required')">
+                                Please enter a valid email address
+                            </mat-error>
+                            <mat-error *ngIf="form.controls['email'].hasError('required')">
+                                Email is <strong>required</strong>
+                            </mat-error>
+                        </mat-form-field>
+                    </div>
+
+                    <div class="formGroup" fxFlex="100">
+                        <mat-form-field appearance="outline" style="width: 100%;">
+                            <mat-label>Password</mat-label>
+                            <input matInput required placeholder="Password" type="password" formControlName="password">
+                            <mat-error *ngIf="form.controls['password'].hasError('required')">Password is required</mat-error>
+                            <mat-error *ngIf="form.controls['password'].hasError('minlength')">Password must have at least 8 characters</mat-error>
+                        </mat-form-field>
+                    </div>
+                    <div class="formGroup" fxFlex="100">
+                        <mat-form-field appearance="outline" style="width: 100%;">
+                            <mat-label>Password Confirm</mat-label>
+                            <input matInput required placeholder="Password Confirm" type="password" formControlName="passwordConfirm">
+                            <mat-error *ngIf="form.hasError('mismatch') && !form.controls['passwordConfirm'].hasError('required')">Passwords don't match</mat-error>
+                            <mat-error *ngIf="form.controls['passwordConfirm'].hasError('required')">Please confirm your password</mat-error>
+                        </mat-form-field>
+                        <!--{{form.hasError('mismatch')}} -->
+                    </div>
+
+                    <div fxFlex="100" class="p-b-10 terms-conditons">
+                        <ul>
+                            <li *ngFor="let term of terms" style="text-decoration: underline;">
+                                <mat-checkbox [(ngModel)]="term.checked" [ngModelOptions]="{standalone: true}"></mat-checkbox><span (click)="showTerms(term);"> Terms and Conditions </span>
+                            </li>
+                        </ul>
+                        <!-- <div >
+                            <mat-checkbox formControlName="first_condition"> </mat-checkbox> <span (click)="showTerms('termoA');"> Terms and Conditions</span>
+                        </div>
+                        <div>
+                            <mat-checkbox formControlName="second_condition"> </mat-checkbox> <span (click)="showTerms('termoB');"> Terms and Conditions 2</span>
+                        </div> -->
+                    </div>
+
+                    <div fxFlex="100" *ngIf="errorMessage != ''" style="text-align: center;">
+                        <span style="font-size: 12px; color: red;">
+                            {{errorMessage}}
+                        </span>
+                    </div>
+
+                    <!-- Calling SignIn Api from AuthService -->
+                    <div class="formGroup text-center" fxFlex="100" >
+                        <button mat-raised-button color="white" style="margin-right: 10px;" mat-dialog-close >Cancel</button>
+                        <button mat-raised-button color="primary" style="margin-left: 10px;" (click)="signUp();" [disabled]="!form.valid || disabled">Register</button>
+                    </div>
+
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,32 @@
+<div fxLayout="row wrap">
+    <div fxFlex="100" style="margin-bottom: -40px;">
+        <button mat-icon-button class="close-button" align="end" [mat-dialog-close]="true">
+            <mat-icon class="close-icon" color="warn">close</mat-icon>
+        </button>
+    </div>
+    <div fxFlex.gt-md="100" fxFlex="100" cdkFocusInitial>
+        <div fxLayout="row wrap">
+            <div fxFlex="100" style="text-align: center; padding: 10px 10px 0 10px;">
+                <h2>Report</h2>
+            </div>
+            <form fxFlex="100" [formGroup]="form">
+                <div fxLayout="row wrap">
+                    <div fxFlex="100" class="p-l-10 p-r-10 p-t-10">
+                        <label>Leave a report</label>
+                        <mat-form-field appearance="outline" class="full-width">
+                            <textarea matInput placeholder="describe the reason" class="report-textarea" formControlName="reason" cdkTextareaAutosize
+                            cdkAutosizeMinRows="4"></textarea>
+                        </mat-form-field>
+                    </div>
+                    <div fxFlex="100" class="p-l-10 p-r-10">
+                        <button mat-raised-button color="primary" (click)="save()" [disabled]="disabled" style="width: 100%;">
+                            Send Report
+                        </button>
+                        <mat-progress-bar color="primary" mode="indeterminate" style="width: 100%; margin-top: 10px; padding: 5px 0;" *ngIf="disabled">
+                    </mat-progress-bar>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

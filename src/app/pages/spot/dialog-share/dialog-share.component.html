@@ -1,0 +1,16 @@
+<div fxLayout="row wrap">
+    <div fxFlex="100" style="text-align: center;"><h2>Do you want to share this spot?</h2></div>
+    <div fxFlex="100" style="text-align: center;">
+        <share-buttons [theme]="'modern-light'"
+            [include]="['facebook','twitter','whatsapp','copy']"
+            [show]="4" [description]="'Check this Spot Area'"
+            [url]="currentUrl">
+        </share-buttons>
+    </div>
+    <div fxFlex="100" style="padding: 10px; text-align: center;"> OR</div>
+    <div fxFlex="100" style="text-align: center;">
+        <button mat-raised-button style="background-color: rgb(37 211 102);; color: rgb(245, 237, 237);" (click)="close()" >
+            Back to Spot
+        </button>
+    </div>
+</div>

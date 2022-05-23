@@ -1,0 +1,151 @@
+<div fxLayout="row wrap" *ngIf="data != null" class="spotView">
+    <!-- <div fxFlex="100" style="margin-bottom: -40px;">
+            <button mat-icon-button class="close-button" align="end" [mat-dialog-close]="true">
+                <mat-icon class="close-icon" color="warn">close</mat-icon>
+            </button>
+        </div> -->
+    <div fxFlex.gt-md="100" fxFlex="100" class="p-10 resizeContent" cdkFocusInitial>
+        <div fxLayout="row wrap">
+            <div fxFlex="15" class="favorite p-t-10" *ngIf="data != null && checkFavorite() == false">
+                <mat-icon aria-hidden="false" color="warn" title="Remove Favorite Spot" aria-label="Favorite Spot"
+                    (click)="favorite();" class="cursor">favorite_border</mat-icon>
+            </div>
+            <div fxFlex="15" class="favorite p-t-10" *ngIf="data != null && checkFavorite() == true">
+                <mat-icon aria-hidden="false" color="warn" title="Favorite this Spot" aria-label="Favorite this Spot"
+                    (click)="remove();" class="cursor">favorite</mat-icon>
+            </div>
+            <div fxFlex="70" style="text-align: center;" class="p-t-10">
+                <h2>{{data.name | uppercase }}</h2>
+            </div>
+            <div fxFlex="15" class="report p-t-10">
+                <mat-icon aria-hidden="false" color="warn" title="Report spot problems!" aria-label="Report this Spot"
+                    (click)="report();" class="cursor">report</mat-icon>
+            </div>
+            <div fxFlex="100" class="p-10">
+                <app-star-review [spotId]="data.uid" [title]="data.name"></app-star-review>
+            </div>
+            <div fxFlex="100" class="p-l-10 p-r-10">
+                <span style="font-weight: bold;"> Address: </span> {{data.address.route}}
+                {{data.address.street_number}}, {{data.address.city}} - {{data.address.country}}. 
+            </div>
+            <div fxFlex="100" class="p-l-10 p-r-10"> 
+                <span style="font-weight: bold;" *ngIf="data?.address.point_of_interest"> Reference Point: </span>
+                {{data.address.point_of_interest}}
+            </div>
+            <div fxFlex="100" class="p-l-10 p-r-10">
+                <span style="font-weight: bold;"> Spot Conditions: </span> {{data.conditions}}
+            </div>
+            <div fxFlex="100" class="p-l-10 p-r-10" style="margin-top: 10px;">
+                <label style="font-weight: bold;">Spot Types</label>
+                <ul style="list-style-type: none; padding-left: 0px">
+                    <li *ngFor="let type of data.types; let i = index" style="float: left; margin-right: 10px; display: flex;
+                        align-items: center;">
+                        <mat-icon style="color: green; height: 30px; width: 30px;">done</mat-icon>{{type}}
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div fxFlex="100" class="gallery p-10" id="gallery">
+        <div *ngFor="let src of data?.pictures; let i = index" class="gallery-item" id="gallery-item-{{i}}"
+            (click)="imageResize(i)">
+            <!---->
+            <div class="content">
+                <div class="image-container">
+                    <img [src]="src.downloadURL" style="object-fit: cover;">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- <div fxFlex="100">
+        <div fxLayout="row wrap" fxLayoutGap="5px">
+            <div *ngFor="let picture of data.pictures; let i = index" fxFlex="calc(50% - 5px)" class="gallery">
+                <img [src]="picture.downloadURL" alt="galeria" width="600" height="400">
+            </div>
+        </div>
+    </div> -->
+    <div fxFlex="100" class="p-l-10 p-r-10" style="display: flex; align-items: center; justify-content: space-between;">
+
+        <button mat-raised-button style="font-size: 14px;" (click)="addReview()">
+            <mat-icon>add</mat-icon>
+            Review</button>
+
+        <!-- <share-buttons [theme]="'material-dark'" [include]="['facebook','twitter','whatsapp','copy']" [show]="1"
+            [image]="data.pictures[0]" [title]="currentTitle" [description]="'Check this Spot Area'">
+        </share-buttons> -->
+        <share-popup-button [showIcon]="true"
+        [showText]="true" [theme]="'modern-light'" [include]="['facebook','twitter','whatsapp','copy']"
+            [image]="data.pictures[0]" [title]="currentTitle" [description]="'Look this Spot'" [url]="currentUrl">
+        </share-popup-button>
+    </div>
+    <!-- <div fxFlex="100" class="p-r-10" style="text-align: right;">
+        <button mat-raised-button>Add Review</button>
+    </div> -->
+    
+    <mat-accordion class="p-10 mt-10 reviews-headers-align">
+        <mat-expansion-panel>
+            <mat-expansion-panel-header>
+                <mat-panel-title>
+                    Reviews
+                </mat-panel-title>
+                <mat-panel-description>
+                    Show Reviews
+                    <!-- <mat-icon (click)="clicar()">account_circle</mat-icon> -->
+                </mat-panel-description>
+            </mat-expansion-panel-header>
+            <div style="width: 100%;" class="p-10">
+                <mat-list>
+                    <mat-list-item *ngFor="let review of reviews">
+                        <mat-icon mat-list-icon>person_outline</mat-icon>
+                        <div mat-line style="font-weight: 500;" class="resizeContent">{{review.user_name | titlecase}}</div>
+                        <div mat-line >{{review.review}}</div>
+                        <mat-divider></mat-divider>
+                    </mat-list-item>
+                </mat-list>
+            </div>
+        </mat-expansion-panel>
+    </mat-accordion>
+
+</div>
+
+
+<!-- <div fxLayout="row wrap" *ngIf="data != null">
+    <div fxFlex="100" style="margin-bottom: -40px;">
+        <button mat-icon-button class="close-button" align="end" [mat-dialog-close]="true">
+            <mat-icon class="close-icon" color="warn">close</mat-icon>
+        </button>
+    </div>
+    <div fxFlex.gt-md="100" fxFlex="100" class="p-10" cdkFocusInitial>
+        <div fxLayout="row wrap">
+            <div fxFlex="100" style="text-align: center; padding: 10px 10px 0 10px;">
+                <h2>{{data.name | uppercase }}</h2>
+            </div>
+            <div fxFlex="100" class="p-10">
+                <app-star-review [spotId]="data.uid" [title]="data.name"></app-star-review>
+            </div>
+            <div fxFlex="100" class="p-10">
+                {{data.conditions}}
+            </div>
+            <div fxFlex="100" class="p-l-10 p-r-10">
+                <ul style="list-style-type: none; padding-left: 0px">
+                    <li *ngFor="let type of data.types; let i = index" style="float: left; margin-right: 10px; display: flex;
+                    align-items: center;">
+                        <mat-icon style="color: green; height: 30px; width: 30px;">done</mat-icon>{{type}}
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div fxFlex="100">
+        <div fxLayout="row wrap" fxLayoutGap="5px">
+            <div *ngFor="let picture of data.pictures; let i = index" fxFlex="calc(50% - 5px)" class="gallery">
+                <img [src]="picture" alt="galeria" width="600" height="400">
+            </div>
+        </div>
+    </div>
+</div> -->
+<div *ngIf="data == null" class="loader-container">
+    <mat-spinner></mat-spinner>
+</div>

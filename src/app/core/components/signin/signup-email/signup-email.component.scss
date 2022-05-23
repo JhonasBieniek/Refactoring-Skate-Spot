@@ -1,0 +1,29 @@
+@import '~quill/dist/quill.snow.css';
+.terms-conditons {
+    margin-left: 30%;
+}
+
+.terms-conditons span {
+    cursor: pointer;
+    font-weight: bold;
+    margin-left: 5px;
+}
+
+ul {
+    list-style-type: none;
+    margin-top: 4px;
+    margin-bottom: 0px;
+    padding-left: 0px;
+
+    li {
+        margin-top: 4px;
+        margin-bottom: 4px;
+    }
+}
+
+
+@media screen and (max-width: 380px) {
+    .terms-conditons {
+        margin-left: 25%;
+    }
+}

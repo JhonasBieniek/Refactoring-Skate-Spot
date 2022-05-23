@@ -1,0 +1,72 @@
+<!--<div style="display: flex; justify-content: center; align-items: center;">
+    <h2 style="margin: 0px;">{{title | uppercase }}</h2> 
+    <fieldset class="rating">
+        <ng-container *ngFor="let num of [5, 4, 3, 2, 1]">
+    
+            <input [id]="'star'+num" [value]="num"  [class] = "num <= avgRating ? 'active' : 'inactive'" name="rating" type="radio" />
+    
+            <label class="full" [for]="'star'+num"></label>
+    
+            <input [value]="num-0.5" [class] = "(num-0.5) <= avgRating ? 'active' : 'inactive'" [id]="'halfstar'+num" name="rating" type="radio" />
+    
+            <label class="half" [for]="'halfstar'+num"></label>
+    
+        </ng-container>
+    </fieldset>
+    <div class="starLength">({{stars.length}})</div>
+</div>-->
+<!-- <mat-divider style="display: flex;"></mat-divider> -->
+
+
+<div style="display: inline;">
+    <div class="avgRating">{{ getMyRating() }} </div>
+    <fieldset class="rating">
+        <ng-container *ngFor="let num of [5, 4, 3, 2, 1]">
+    
+            <input [id]="'star'+num" [value]="num"  [class] = "num <= getMyRating() ? 'active' : 'inactive'" name="rating" type="radio" />
+    
+            <label (click)="starHandler(num)" class="full" [for]="'star'+num"></label>
+            
+            <!-- <input [id]="'halfstar'+num" [value]="num-0.5" [class] = "(num-0.5) <= ratingValue ? 'active' : 'inactive'" name="rating" type="radio" />
+    
+            <label (click)="starHandler(num)" class="half" [for]="'halfstar'+num"></label> -->
+        </ng-container>
+    </fieldset>
+    <div class="starLength">
+        Spot Rating: {{avgRating == 0 ? avgRating : avgRating.toFixed(1)}} 
+    </div>
+</div>
+
+<!-- Spot Rating  e my rating em texto   -->
+<!-- <div style="display: inline;">
+    <div class="avgRating" (click)="review()">{{ avgRating }} </div>
+    <fieldset class="rating">
+        <ng-container *ngFor="let num of [5, 4, 3, 2, 1]">
+    
+            <input [id]="'star'+num" [value]="num"  [class] = "num <= avgRating ? 'active' : 'inactive'" name="rating" type="radio" />
+    
+            <label (click)="review()" class="full" [for]="'star'+num"></label>
+            
+            <input [id]="'halfstar'+num" [value]="num-0.5" [class] = "(num-0.5) <= avgRating ? 'active' : 'inactive'" name="rating" type="radio" />
+    
+            <label (click)="review()" class="half" [for]="'halfstar'+num"></label>
+        </ng-container>
+    </fieldset>
+    <div class="starLength" *ngIf="getMyRating() >= 0">
+        Spot Rating: {{getMyRating()}} 
+    </div>
+</div> -->
+
+
+
+<!--<div style="width: 100%;">
+    <fieldset class="rating">
+        <ng-container *ngFor="let num of [5, 4, 3, 2, 1]">
+
+            <input (click)="starHandler(num)" [id]="'star'+num" [value]="num"  [class] = "num <= ratingValue ? 'active' : 'inactive'" name="rating" type="radio" />
+
+            <label class="full" [for]="'star'+num"></label>
+
+        </ng-container>
+    </fieldset>
+</div> -->

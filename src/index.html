@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>SkateBoardOnly</title>
+  <base href="./">
+  <meta name="viewport" content="">
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&amp;display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <!-- <script id="maps" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyACmzpmAsMKnFJZJUou8bQPyCEQ13kGIl8"></script> -->
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="theme-color" content="#1976d2">
+  
+  <!--  Essential META Tags -->
+
+  <meta property="og:title" content="SkateSfera">
+  <meta property="og:type" content="activity" />
+  <meta property="og:description" content="teste">
+  <meta property="og:image" content="https://dugong.com.br/skatesfera/assets/images/skateSpot.png">
+  <meta property="og:image:width" content="600" />
+  <meta property="og:image:height" content="400" />
+  <meta property="og:image:type" content="image/png" />
+  <meta property="og:url" content="">
+  <meta name="twitter:card" content="">
+  <meta name="description" content="teste" />
+
+  <!--  Non-Essential, But Recommended -->
+
+  <!-- <meta property="og:site_name" content="European Travel, Inc.">
+  <meta name="twitter:image:alt" content="Alt text for image"> -->
+
+
+  <!--  Non-Essential, But Required for Analytics -->
+
+  <!-- <meta property="fb:app_id" content="your_app_id" />
+  <meta name="twitter:site" content="@website-username"> -->
+</head>
+<script>
+  var iOS = navigator.platform && /iPad|iPhone|iPod/.test(navigator.platform);
+  if (iOS){
+    window.addEventListener('orientationchange', () => {
+      document.documentElement.style.height = `-webkit-fill-available`;
+      setTimeout(() => {
+        document.documentElement.style.height = `100%`;
+          setTimeout(() => {
+            // this line prevents the content
+            // from hiding behind the address bar
+            window.scrollTo(0, 1);
+          }, 200);
+      }, 500);
+    });
+    document.head.querySelector('meta[name="viewport"]').content = "width=device-width, initial-scale=1, maximum-scale=1";
+  }else{
+    document.head.querySelector('meta[name="viewport"]').content = "width=device-width, initial-scale=1";
+  }  
+</script>
+<body class="mat-typography">
+  <app-root></app-root>
+  <noscript>Please enable JavaScript to continue using this application.</noscript>
+</body>
+</html>

@@ -1,0 +1,100 @@
+<div *ngIf="disabled" class="loader-container">
+    <mat-spinner ></mat-spinner>
+</div>
+<div fxLayout="row wrap">
+    <div fxFlex.gt-md="100" fxFlex="100">
+        <div fxLayout="row wrap">
+            <div fxFlex="50" style="text-align: left; padding: 10px 10px 0 10px;">
+                <h2>Skater View</h2>
+            </div>
+            <div fxFlex="50" style="text-align: right" class="p-10">
+                <mat-icon aria-hidden="false" aria-label="back to home" (click)="close()" style="margin-left: 5px; margin-right: 10px; cursor: pointer;">
+                    home
+                </mat-icon>
+                <mat-icon aria-hidden="false" aria-label="Edit profile" *ngIf="authService.user?.uid == skater?.user_uid" (click)="edit()" style="margin-left: 5px; margin-right: 10px; cursor: pointer;">
+                    edit
+                </mat-icon>
+                <!-- <button mat-raised-button style="margin-left: 5px; margin-right: 10px;" (click)="close()">
+                    back
+                </button>
+                <button mat-raised-button style="margin-left: 5px; margin-right: 10px;"
+                    *ngIf="user?.uid == skater?.user_uid" (click)="edit()">
+                    Edit
+                </button> -->
+            </div>
+            <div fxLayout="row wrap" class="userForm" fxFlex="100">
+                <div fxFlex="100" fxFlex.gt-md="100" class="p-l-10 p-r-10">
+                    <span class="defaultOptions">Name:</span> {{skater?.name | titlecase}}
+                </div>
+                <mat-divider fxFlex="100"></mat-divider>
+                <div fxFlex="100">
+                    <h2 class="p-l-10">Skate Setup</h2>
+                </div>
+                <div fxFlex="100" fxFlex.gt-md="34" class="p-l-10 p-r-10">
+                    <span class="defaultOptions">Deck:</span> {{ skater?.deck}}
+                </div>
+                <div fxFlex="100" fxFlex.gt-md="33" class="p-l-10 p-r-10">
+                    <span class="defaultOptions">Truck:</span> {{ skater?.truck }}
+                </div>
+                <div fxFlex="100" fxFlex.gt-md="33" class="p-l-10 p-r-10">
+                    <span class="defaultOptions">Wheel:</span> {{ skater?.wheel }}
+                </div>
+                <div fxFlex="100" fxFlex.gt-md="33" class="p-l-10 p-r-10">
+                    <span class="defaultOptions">Bearings:</span> {{ skater?.bearings}}
+                </div>
+                <mat-divider fxFlex="100"></mat-divider>
+                <div fxFlex="100">
+                    <h2 class="p-l-10">Favorite Skaters</h2>
+                </div>
+                <div fxFlex="100" class="p-l-10 p-r-10" style="margin-top: -10px;">
+                    <ul style="list-style-type: none; padding-left: 0px">
+                        <li *ngFor="let pro of skater?.pros; let i = index" style="float: left; margin-right: 10px; display: flex;
+                            align-items: center;">
+                            <mat-icon style="color: green; height: 30px; width: 30px;">person</mat-icon>{{pro}}
+                        </li>
+                    </ul>
+                </div>
+                <mat-divider fxFlex="100"></mat-divider>
+                <div fxFlex="100">
+                    <h2 class="p-l-10">Marketing</h2>
+                </div>
+                <div fxFlex="100" class="p-l-10 p-r-10" style="margin-top: -10px;">
+                    <p class="defaultOptins">Sponsorships:</p>
+                    <ul style="list-style-type: none; padding-left: 0px; margin-top: -10px;" >
+                        <li *ngFor="let sponsorship of skater?.sponsorships; let i = index" style="float: left; margin-right: 10px; display: flex;
+                            align-items: center;">
+                            <mat-icon style="color: green; height: 30px; width: 30px;">done</mat-icon>{{sponsorship}}
+                        </li>
+                    </ul>
+                </div>
+                <div fxFlex="100" class="p-l-10 p-r-10">
+                    <p class="defaultOptins">Brands:</p>
+                    <ul style="list-style-type: none; padding-left: 0px; margin-top: -10px;">
+                        <li *ngFor="let brand of skater?.brands; let i = index" style="float: left; margin-right: 10px; display: flex;
+                            align-items: center;">
+                            <mat-icon style="color: green; height: 30px; width: 30px;">done</mat-icon>{{brand}}
+                        </li>
+                    </ul>
+                </div>
+                <mat-divider fxFlex="100"></mat-divider>
+                <div fxFlex="100">
+                    <div class="p-l-10 p-t-10"> <span class="defualtOptions"> Places registered by </span> {{ skater?.name | titlecase}}</div>
+                </div>
+                <div *ngIf="spots != null" class="p-t-10">
+                    <p *ngFor="let spot of spots;" class="p-l-10" style="font-weight: 500;">
+                        {{spot.name | titlecase}}
+                    </p>
+                </div>
+                <mat-divider fxFlex="100"></mat-divider>
+                    <div fxFlex="100">
+                        <h2 class="p-l-10">My Favorite Spots</h2>
+                    </div>
+                    <div *ngIf="spots != null">
+                        <p *ngFor="let favorite of favorites_spots;" class="p-l-10">
+                            {{favorite.name}}
+                        </p>
+                    </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,135 @@
+<div *ngIf="disabled" class="loader-container">
+    <mat-spinner ></mat-spinner>
+</div>
+<div fxLayout="row wrap" *ngIf="start" class="spotEdit">
+    <div fxFlex.gt-md="100" fxFlex="100">
+        <div fxLayout="row wrap">
+            <!-- <div fxFlex="50" style="text-align: left; padding: 10px 10px 0 10px;">
+                <h2>Spot Edit</h2>
+            </div>
+            <div fxFlex="50" style="text-align: right" class="p-10">
+                <button mat-raised-button style="margin-right: 5px;" [routerLink]="'/'">
+                    Cancel
+                </button>
+                <button mat-raised-button style="margin-left: 5px; margin-right: 10px;" (click)="save()" [disabled]="disabled || dataPictures.length == 0">
+                    Save
+                </button>
+            </div> -->
+            <form [formGroup]="resourceForm" fxFlex="100">
+                <div fxLayout="row wrap" class="spotForm">
+                    <!-- <div fxFlex="70" class="p-l-10 p-r-10" *ngIf="historyData?.address.length > 0">
+                        <mat-form-field appearance="outline" class="full-width">
+                            <mat-label>Select Address</mat-label>
+                            <mat-select [formControl]="adress" (selectionChange)="GeocodingData()">
+                              <mat-option *ngFor="let addres of historyData.address" [value]="addres.address">{{addres.address}}</mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                    </div> -->
+                    <!--<div fxFlex="70" class="p-l-10 p-r-10" *ngIf="historyData.address.length == null">
+                        <span style="font-weight: 600; padding-left: 5px;">Address: </span> {{historyData?.address.address}}
+                    </div> -->
+                    <div formGroupName="address" fxLayout="row wrap" fxFlex="100">
+                        <div fxFlex="70" class="p-l-10 p-r-10 p-t-10" >
+                            <mat-form-field appearance="outline" class="full-width">
+                                <mat-label>Street</mat-label>
+                                <input matInput required placeholder="street" formControlName="route" > <!-- (blur)="GeocodingData()" -->
+                            </mat-form-field>
+                        </div>
+                        <div fxFlex="30" class="p-l-10 p-r-10 p-t-10" >
+                            <mat-form-field appearance="outline" class="full-width">
+                                <mat-label>Numero</mat-label>
+                                <input matInput placeholder="Numero" formControlName="street_number" > <!-- (blur)="GeocodingData()" -->
+                            </mat-form-field>
+                        </div>
+                        <div fxFlex="100" class="p-l-10 p-r-10" >
+                            <mat-form-field appearance="outline" class="full-width">
+                                <mat-label>Reference Point</mat-label>
+                                <input matInput placeholder="Reference Point" formControlName="point_of_interest" > <!-- (blur)="GeocodingData()" -->
+                            </mat-form-field>
+                        </div>
+                        <div fxFlex="33" class="p-l-10 p-r-10" >
+                            <mat-form-field appearance="outline" class="full-width">
+                                <mat-label>City</mat-label>
+                                <input matInput readonly placeholder="Reference Point" formControlName="city" > <!-- (blur)="GeocodingData()" -->
+                            </mat-form-field>
+                        </div>
+                        <div fxFlex="33" class="p-l-10 p-r-10" >
+                            <mat-form-field appearance="outline" class="full-width">
+                                <mat-label>State</mat-label>
+                                <input matInput readonly placeholder="Reference Point" formControlName="state" > <!-- (blur)="GeocodingData()" -->
+                            </mat-form-field>
+                        </div>
+                        <div fxFlex="34" class="p-l-10 p-r-10" >
+                            <mat-form-field appearance="outline" class="full-width">
+                                <mat-label>Country</mat-label>
+                                <input matInput readonly placeholder="Reference Point" formControlName="country" > <!-- (blur)="GeocodingData()" -->
+                            </mat-form-field>
+                        </div>
+                    </div>
+                    <div fxFlex="100" class="p-l-10 p-r-10">
+                        <mat-form-field appearance="outline" class="full-width">
+                            <mat-label>Spot Name</mat-label>
+                            <input matInput required placeholder="Spot Name" formControlName="name">
+                        </mat-form-field>
+                    </div>
+                    <div fxFlex="100" fxFlex.gt-xs="50" class="p-l-10 p-r-10">
+                        <mat-form-field appearance="outline" class="full-width">
+                            <mat-label>Types</mat-label>
+                            <mat-select formControlName="types" multiple>
+                              <mat-option *ngFor="let type of dataTypes" [value]="type.name">{{type.name | titlecase}}</mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
+                    <div fxFlex="100" fxFlex.gt-xs="50" class="p-l-10 p-r-10">
+                        <mat-form-field appearance="outline" class="full-width">
+                            <mat-label>Conditions</mat-label>
+                            <mat-select formControlName="conditions">
+                              <mat-option *ngFor="let condition of dataConditions" [value]="condition.name">{{condition.name | titlecase}}</mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
+                    <div fxFlex="100" class="p-l-10 p-r-10">
+                        <div fxLayout="row wrap">
+                            <div fxFlex="100" style="padding-left: 5px;">
+                                Pictures:
+                                <button mat-icon-button color="primary" type="button" aria-label="upload button" (click)="fileInput.click()" [disabled]="dataPictures.length >= maxImgs">
+                                    <mat-icon>attach_file</mat-icon>
+                                </button>
+                                <input hidden #fileInput id="fileInput" type="file" accept=".jpg,.png,.jpeg" multiple (change)="selectFiles($event)">
+                                <input hidden #fileCamInput id="fileCamInput" type="file" accept=".jpg,.png,.jpeg" (change)="selectFiles($event)">
+                            </div>
+                            <div fxFlex="100" class="gallery" id="gallery">
+                                <mat-menu #aboveMenu="matMenu" yPosition="above">
+                                    <ng-template matMenuContent let-row="row">
+                                        <button mat-menu-item (click)="setCover(row)">Use as Cover</button>
+                                        <button mat-menu-item (click)="remove(row)">Remove</button>
+                                    </ng-template>
+                                </mat-menu>
+                                <div *ngFor="let src of dataPictures; let i = index" class="gallery-item" id="gallery-item-{{i}}" >
+                                    <button mat-mini-fab type="button" class="close" [matMenuTriggerFor]="aboveMenu" [matMenuTriggerData]="{row: i}">
+                                        <mat-icon>more_vert</mat-icon>
+                                    </button>
+                                    <div class="content" (click)="imageResize(i)">
+                                        <div class="image-container">
+                                            <img [src]="src.downloadURL">
+                                            <div class="text-block" *ngIf="src.cover === true">
+                                                <p>Cover</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div *ngIf="dataPictures.length < maxImgs" class="gallery-item" (click)="fileInput.click()"> <!--(click)="imageResize(i)"-->
+                                    <div class="content">
+                                        <div class="image-container">
+                                            <img [src]="'./assets/images/placeholder.png'" style="object-fit: fill;">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
