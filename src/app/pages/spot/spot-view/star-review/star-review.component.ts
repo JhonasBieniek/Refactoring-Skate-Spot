@@ -5,7 +5,7 @@ import { Star } from '../../shared/models/star.model';
 
 import { onSnapshot} from '@firebase/firestore';
 import { Unsubscribe } from '@firebase/util';
-import { AuthService } from 'src/app/core/services/auth.service';
+import { AuthService } from 'src/app/shared/services/auth.service';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { ConfirmationDialogComponent } from 'src/app/shared/confirmation-dialog/confirmation-dialog.component';
 import { SigninComponent } from 'src/app/core/components/signin/signin.component';

@@ -2,7 +2,7 @@ import { Component, OnInit, } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute, Router } from '@angular/router';
-import { AuthService } from 'src/app/core/services/auth.service';
+import { AuthService } from 'src/app/shared/services/auth.service';
 import { SkaterService } from 'src/app/pages/skaters/shared/skater.service';
 import { SpotService } from 'src/app/pages/spot/shared/spot.service';
 import { Skater } from 'src/app/pages/skaters/shared/skater.model';

@@ -2,12 +2,12 @@ import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthProvider, createUserWithEmailAndPassword, FacebookAuthProvider, getAdditionalUserInfo, getAuth, GoogleAuthProvider, sendEmailVerification, sendPasswordResetEmail, signInWithEmailAndPassword, signInWithPopup, signOut, updateProfile, UserCredential } from 'firebase/auth';
 import { Skater } from 'src/app/pages/skaters/shared/skater.model';
-import { NotificationService } from '../../shared/services/notification.service';
+import { NotificationService } from './notification.service';
 import { SkaterService } from '../../pages/skaters/shared/skater.service';
 import { getFunctions, httpsCallable, connectFunctionsEmulator } from "firebase/functions";
 import { MatDialog } from '@angular/material/dialog';
-import { DialogRequestTermsComponent } from '../components/signin/dialog-request-terms/dialog-request-terms.component';
-import { TermsService } from '../../shared/services/termsConditions.service';
+import { DialogRequestTermsComponent } from '../../core/components/signin/dialog-request-terms/dialog-request-terms.component';
+import { TermsService } from './termsConditions.service';
 import { QueryDocumentSnapshot, QuerySnapshot } from 'firebase/firestore';
 
 @Injectable({

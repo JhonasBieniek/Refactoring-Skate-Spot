@@ -228,7 +228,7 @@
                             <label>try these steps to fix the problem, then reload the page.</label>
                         </section>
 
-                        <section class="text-center" *ngIf="platform.IOS">
+                        <section class="text-center" *ngIf="platformOpeating.IOS">
                             <div class="error-gallery" id="error-gallery">
                                 <div class="error-gallery-item">
                                     <div class="image-container">
@@ -250,7 +250,7 @@
                             </div> -->
                         </section>
 
-                        <section class="text-center" *ngIf="platform.ANDROID">
+                        <section class="text-center" *ngIf="platformOpeating.ANDROID">
                             <div class="error-gallery" id="error-gallery">
                                 <div class="error-gallery-item">
                                     <div class="image-container">
@@ -260,7 +260,7 @@
                             </div>
                         </section>
 
-                        <section class="text-center m-t-20" *ngIf="!platform.ANDROID && !platform.IOS" >
+                        <section class="text-center m-t-20" *ngIf="!platformOpeating.ANDROID && !platformOpeating.IOS" >
                             Enable Geolocation !
                         </section>
 

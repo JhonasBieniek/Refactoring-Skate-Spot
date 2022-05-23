@@ -1,7 +1,7 @@
 import { NavbarService } from '../../services/navbar.service';
 import { BreakpointObserver } from '@angular/cdk/layout';
 import { NgxImageCompressService } from 'ngx-image-compress';
-import { SharedService } from './../../../core/services/shared.service';
+import { SharedService } from '../../services/shared.service';
 import { HttpClient } from '@angular/common/http';
 import { ConditionsService } from '../../services/conditions.service';
 import { TypesService } from '../../services/types.service';
@@ -9,7 +9,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { NotificationService } from '../../services/notification.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { SpotService } from '../../../pages/spot/shared/spot.service';
-import { AuthService } from './../../../core/services/auth.service';
+import { AuthService } from '../../services/auth.service';
 
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';

@@ -2,13 +2,13 @@ import { AfterViewChecked, Component, ElementRef, OnInit, ViewChild } from '@ang
 import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
-import { AuthService } from 'src/app/core/services/auth.service';
+import { AuthService } from 'src/app/shared/services/auth.service';
 import { SkaterService } from 'src/app/pages/skaters/shared/skater.service';
 import { SpotService } from 'src/app/pages/spot/shared/spot.service';
 import { Skater } from 'src/app/pages/skaters/shared/skater.model';
 import {COMMA, ENTER} from '@angular/cdk/keycodes';
 import { MatChipInputEvent } from '@angular/material/chips';
-import { SharedService } from 'src/app/core/services/shared.service';
+import { SharedService } from 'src/app/shared/services/shared.service';
 import { Subscription } from 'rxjs';
 
 @Component({

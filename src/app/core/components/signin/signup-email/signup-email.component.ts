@@ -2,7 +2,7 @@ import { Component, Inject, NgZone, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { MatDialog, MatDialogConfig, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { QueryDocumentSnapshot, QuerySnapshot } from 'firebase/firestore';
-import { AuthService } from 'src/app/core/services/auth.service';
+import { AuthService } from 'src/app/shared/services/auth.service';
 import { NotificationService } from 'src/app/shared/services/notification.service';
 import { terms, TermsService } from 'src/app/shared/services/termsConditions.service';
 

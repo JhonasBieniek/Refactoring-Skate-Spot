@@ -3,7 +3,7 @@ import { Component, Injector, OnInit, ViewEncapsulation } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { ActivatedRoute, Router } from '@angular/router';
-import { AuthService } from 'src/app/core/services/auth.service';
+import { AuthService } from 'src/app/shared/services/auth.service';
 import { SpotService } from 'src/app/pages/spot/shared/spot.service'; 
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { NotificationService } from 'src/app/shared/services/notification.service';
@@ -12,7 +12,7 @@ import { ConfirmationDialogComponent } from 'src/app/shared/confirmation-dialog/
 import { TypesService } from 'src/app/shared/services/types.service';
 import { ConditionsService } from 'src/app/shared/services/conditions.service';
 import { HttpClient } from '@angular/common/http';
-import { SharedService } from 'src/app/core/services/shared.service';
+import { SharedService } from 'src/app/shared/services/shared.service';
 import { Subscription } from 'rxjs';
 import { DataUrl, DOC_ORIENTATION, NgxImageCompressService } from 'ngx-image-compress';
 import { BreakpointObserver, BreakpointState } from '@angular/cdk/layout';

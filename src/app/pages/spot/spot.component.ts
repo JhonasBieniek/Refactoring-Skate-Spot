@@ -6,7 +6,7 @@ import { Spot, imgFiles } from './shared/models/spot.model';
 import { Component, OnInit, ViewEncapsulation, Injector } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
-import { AuthService } from 'src/app/core/services/auth.service';
+import { AuthService } from 'src/app/shared/services/auth.service';
 import { SpotService } from 'src/app/pages/spot/shared/spot.service'; 
 import { geohashForLocation } from 'geofire-common';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -17,7 +17,7 @@ import { ConditionsService } from 'src/app/shared/services/conditions.service';
 import { QueryDocumentSnapshot, QuerySnapshot } from 'firebase/firestore';
 import { NotificationService } from 'src/app/shared/services/notification.service';
 import { Subscription } from 'rxjs';
-import { SharedService } from 'src/app/core/services/shared.service';
+import { SharedService } from 'src/app/shared/services/shared.service';
 import { DataUrl, DOC_ORIENTATION, NgxImageCompressService, UploadResponse } from 'ngx-image-compress';
 import { runInThisContext } from 'vm';
 
