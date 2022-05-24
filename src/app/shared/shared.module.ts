@@ -1,6 +1,5 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MapsComponent } from './components/maps/maps.component';
 import { GoogleMapsModule } from '@angular/google-maps';
 import { HttpClientJsonpModule, HttpClientModule } from '@angular/common/http';
 import {MatButtonModule} from '@angular/material/button';
@@ -12,7 +11,6 @@ import { BaseSpotFormComponent } from './components/base-spot-form/base-spot-for
 
 @NgModule({
   declarations: [
-    MapsComponent,
     ConfirmationDialogComponent
   ],
   imports: [
@@ -25,7 +23,6 @@ import { BaseSpotFormComponent } from './components/base-spot-form/base-spot-for
     MatSidenavModule,
   ],
   exports: [
-    MapsComponent
   ],
   providers: [
   ]
