@@ -1,6 +1,6 @@
 import { NgxImageCompressService, DataUrl } from 'ngx-image-compress';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { imagePreview } from '../spot.component';
+import { imagePreview } from '../../spot.component';
 import { Injectable } from '@angular/core';
 import { collection, addDoc, orderBy, query, startAt, endAt, getDocs, CollectionReference, where, setDoc,doc, getDoc, updateDoc, DocumentReference, collectionGroup } from "firebase/firestore";
 import { getFirestore } from 'firebase/firestore'
@@ -11,19 +11,13 @@ import { switchMap } from 'rxjs/operators';
 import { HttpClient } from '@angular/common/http';
 import { DOC_ORIENTATION } from 'ngx-image-compress';
 
-import { Spot } from './models/spot.model';
-import { Moderation } from './models/moderation.model';
-import { Report } from './models/report.model';
-import { Star } from './models/star.model';
-import { Review } from './models/review.model';
+import { Spot } from '../models/spot.model';
 
 @Injectable({
   providedIn: 'root'
 })
 export class SpotService {
 
-  moderations: CollectionReference;
-  reports: CollectionReference;
   spots: CollectionReference;
 
   thumbnail: any;
@@ -32,16 +26,11 @@ export class SpotService {
   previews: imagePreview[] = [];
   spotsData!: [Spot];
 
-  private navbarValue = new BehaviorSubject<boolean>(false);
   private db = getFirestore();
   private storage = getStorage();
 
-
   constructor(private httpClient: HttpClient,   private _snackBar: MatSnackBar, private imageCompress: NgxImageCompressService) {
     this.spots = collection(this.db,'/spots/');
-    this.reports = collection(this.db, '/reports/');
-    this.moderations = collection(this.db, '/moderations/');
-    //enableIndexedDbPersistence(this.db)
   }
 
   downloadImage(url: string): Observable<string> {
@@ -176,8 +165,6 @@ export class SpotService {
         selectedConditions.push(element.name)
       }
     });
-    
-    //let q = query(collection(this.db,'Spot'), orderBy("Spot"))
     for (const b of bounds) {
       let q;
       if(selectedConditions.length == 0){
@@ -185,21 +172,6 @@ export class SpotService {
       }else{
         q =  query(this.spots, orderBy("hash") , startAt(b[0]) , endAt(b[1]), where("types", "array-contains-any", selectedConditions), where("status", "==", "active"));
       }
-      // if(advanced){
-      //   let selectedConditions: any[string] = []  ;
-      //   conditions.forEach((element:any) => {
-      //     if(element.selected == true){
-      //       selectedConditions.push(element.name)
-      //     }
-      //   });
-      //   if(selectedConditions.length == 0){
-      //     q =  query(this.spots, orderBy("hash") , startAt(b[0]) , endAt(b[1]));
-      //   }else{
-      //     q =  query(this.spots, orderBy("hash") , startAt(b[0]) , endAt(b[1]), where("types", "array-contains-any", selectedConditions));
-      //   }
-      // }else{
-      //   q =  query(this.spots, orderBy("hash") , startAt(b[0]) , endAt(b[1]));
-      // }
       const querySnapshot = await getDocs(q);
       querySnapshot.forEach((doc) => {
         promises.push(doc.data());
@@ -207,7 +179,6 @@ export class SpotService {
     }
     //console.log(promises);
     let matchingDocs:any = [];
-
     promises.forEach((doc:any) => {
       const distanceInKm = distanceBetween([doc.lat, doc.lng], center);
       const distanceInM = distanceInKm * 1000;
@@ -215,14 +186,10 @@ export class SpotService {
         matchingDocs.push(doc);
       }
     });
-
-
     return matchingDocs;
   }
 
   async getAllMapSpots(){
-    
-    //let querySnapshot = await getDocs(this.spots);
     let q = query(this.spots, where("status", "==", "active"))
     let querySnapshot = await getDocs(q);
     let allSpots: any[] =  [];
@@ -234,22 +201,12 @@ export class SpotService {
 
   async getSkaterSpots(user_uid:string,){
     let q =  query(this.spots, orderBy("name"), where("user_uid", "==", user_uid));
-
     return getDocs(q);    
-    //console.log(promises);
-    //return matchingDocs;
   }
 
   getSpotView(uid:string){
     const docRef = doc(this.db, "spots", uid);
     return getDoc(docRef);
-
-    /*if (docSnap.exists()) {
-      console.log("Document data:", docSnap.data());
-    } else {
-      // doc.data() will be undefined in this case
-      console.log("No such document!");
-    }*/
   }
 
   async getAllSpots(searchText: string){
@@ -273,83 +230,5 @@ export class SpotService {
     }
   }
 
-  readSearchBar() {
-    let view = this.navbarValue.getValue();
-    return view;
-  }
-
-  addReport(reason: string, spot_uid: string, user_uid: string, status: string, spot_country: string, spot_name: string, user: string) {
-    let report: Report = {
-        spot_uid: spot_uid,
-        user_uid: user_uid,
-        user: user,
-        spot_name: spot_name,
-        status: status,
-        spot_country: spot_country,
-        reason: reason,
-        moderation_uid: null,
-        created: new Date(),
-        modified: new Date()
-    }
-    return addDoc(this.reports, report);
-  }
-
-  addModeration(spot_uid: string, spot_name:string, situation: string, user_uid: string, spot_country:string, user: any) {
-    let moderation: Moderation = {
-        spot_uid: spot_uid,
-        spot_name: spot_name,
-        moderation_uid: null,
-        situation: situation,
-        user_uid: user_uid,
-        spot_country: spot_country,
-        user: user,
-        created: new Date(),
-        modified: new Date()
-    }
-    return addDoc(this.moderations, moderation);
-  }
-
-  getSpotStars(spot_uid: string) {
-    const docRef = collection(this.db, "spots", spot_uid, "stars");
-    return docRef;
-}
-
-  setStar(user_uid:any, spot_uid:any, value:number) {
-    let date = new Date();
-    const star: Star = { 
-      user_uid, 
-      value,
-      created: date,
-      modified: date
-    };
-    const CollectionReference = collection(this.db, "spots", spot_uid, "stars");
-    const newStar = doc(CollectionReference, user_uid);
-    return setDoc(newStar, star);
-  }
-  
-  updateStar(user_uid:any, spot_uid:any, value:number) {
-    const star: Star = { 
-      user_uid,
-      value,
-      modified: new Date()
-    };
-
-    const docRef = doc(this.db, "spots", spot_uid, "stars", user_uid);
-    return updateDoc(docRef, {
-      ...star
-    })
-  }
-
-    getSpotReviews(spot_uid: string) {
-      const docRef = collection(this.db, "spots", spot_uid, "reviews");
-      return docRef;
-  }
-
-  createReview(user_uid: string, spot_uid: string, user_name: string, review: string) {
-      let date: Date =  new Date();
-      const reviewData: Review = { user_uid, user_name, review , created: date, modified: date};
-      const CollectionReference = collection(this.db, "spots", spot_uid, "reviews");
-      return addDoc(CollectionReference, reviewData);
-  }
 
 }

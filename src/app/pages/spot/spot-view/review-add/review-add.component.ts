@@ -1,12 +1,13 @@
-import { SpotService } from 'src/app/pages/spot/shared/spot.service';
+import { sendData } from './../../shared/services/sendData.service';
+import { SpotService } from 'src/app/pages/spot/shared/services/spot.service';
 import { Component, Inject, OnInit, ViewEncapsulation } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatDialog, MatDialogConfig, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { FirebaseError } from 'firebase/app';
 import { SigninComponent } from 'src/app/core/components/signin/signin.component';
 import { AuthService } from 'src/app/shared/services/auth.service';
-import { NotificationService } from 'src/app/shared/services/notification.service';
-import { ConfirmationDialogComponent } from 'src/app/shared/confirmation-dialog/confirmation-dialog.component';
+import { SharedService } from 'src/app/shared/services/shared.service';
+import { ConfirmationDialogComponent } from 'src/app/shared/components/confirmation-dialog/confirmation-dialog.component';
 
 @Component({
   selector: 'app-review-add',
@@ -18,8 +19,8 @@ export class ReviewAddComponent implements OnInit {
   form!: FormGroup;
   user: any;
 
-  constructor(@Inject(MAT_DIALOG_DATA) public data: any, private fb: FormBuilder, public authService: AuthService, private dialog: MatDialog, private spotService: SpotService, public dialogRef: MatDialogRef<ReviewAddComponent>,
-  private notification: NotificationService) {
+  constructor(@Inject(MAT_DIALOG_DATA) public data: any, private fb: FormBuilder, public authService: AuthService, private sendData: sendData, private dialog: MatDialog, private spotService: SpotService, public dialogRef: MatDialogRef<ReviewAddComponent>,
+  private sharedService: SharedService) {
     this.user = authService.getUser();
   }
 
@@ -31,10 +32,10 @@ export class ReviewAddComponent implements OnInit {
 
   save(){
       if(this.user != null){
-        this.spotService.createReview(this.user.uid, this.data.spot_uid, this.user.displayName ,this.form.controls['review'].value).then( () => {
-          this.notification.notify("Thanks for the review.", 2000);
+        this.sendData.createReview(this.user.uid, this.data.spot_uid, this.user.displayName ,this.form.controls['review'].value).then( () => {
+          this.sharedService.notify("Thanks for the review.", 2000);
         }).catch( (error: FirebaseError) => {
-          this.notification.notify(error.message, 2000);
+          this.sharedService.notify(error.message, 2000);
         });
         this.dialogRef.close();
       }else{
@@ -65,10 +66,10 @@ export class ReviewAddComponent implements OnInit {
             dialogRef.afterClosed().subscribe(result => {
               this.user = this.authService.getUser();
               if(this.user != null){
-                this.spotService.createReview(this.user.uid, this.data.spot_uid, this.user.displayName ,this.form.controls['review'].value).then( () => {
-                  this.notification.notify("Thanks for the review.", 2000);
+                this.sendData.createReview(this.user.uid, this.data.spot_uid, this.user.displayName ,this.form.controls['review'].value).then( () => {
+                  this.sharedService.notify("Thanks for the review.", 2000);
                 }).catch( (error: FirebaseError) => {
-                  this.notification.notify(error.message, 2000);
+                  this.sharedService.notify(error.message, 2000);
                 });
                 this.dialogRef.close();
               }

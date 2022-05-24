@@ -1,11 +1,12 @@
-import { SpotService } from '../../shared/spot.service'
+import { sendData } from './../../shared/services/sendData.service';
+import { SpotService } from '../../shared/services/spot.service'
 import { Component, Inject, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatDialog, MatDialogConfig, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { SigninComponent } from 'src/app/core/components/signin/signin.component';
 import { AuthService } from 'src/app/shared/services/auth.service';
-import { ConfirmationDialogComponent } from 'src/app/shared/confirmation-dialog/confirmation-dialog.component';
+import { ConfirmationDialogComponent } from 'src/app/shared/components/confirmation-dialog/confirmation-dialog.component';
 
 @Component({
   selector: 'app-report-add',
@@ -20,7 +21,7 @@ export class ReportAddComponent implements OnInit {
   disabled:boolean = false;
 
   constructor(@Inject(MAT_DIALOG_DATA) public data: any, private fb: FormBuilder, public authService: AuthService, private dialog: MatDialog,
-    public dialogRef: MatDialogRef<ReportAddComponent>, private _snackBar: MatSnackBar, private spotService: SpotService) {
+    public dialogRef: MatDialogRef<ReportAddComponent>, private _snackBar: MatSnackBar,private sendData: sendData, private spotService: SpotService) {
     this.user = authService.getUser();
   }
 
@@ -34,7 +35,7 @@ export class ReportAddComponent implements OnInit {
     if(this.form.valid){
       if(this.user != null){
         this.disabled = true;
-        this.spotService.addReport( this.form.controls['reason'].value, this.data.spotId, this.user.uid, 'reported', this.data.spot_country, this.data.spot_name, this.user.displayName)
+        this.sendData.addReport( this.form.controls['reason'].value, this.data.spotId, this.user.uid, 'reported', this.data.spot_country, this.data.spot_name, this.user.displayName)
         .then( response => {
           this.disabled = false;
           this._snackBar.open("Reported Spot", undefined, {
@@ -73,7 +74,7 @@ export class ReportAddComponent implements OnInit {
               this.user = this.authService.getUser();
               if(this.user != null){
                 this.disabled = true;
-                this.spotService.addReport( this.form.controls['reason'].value, this.data.spotId, this.user.uid, 'reported', this.data.spot_country, this.data.spot_name, this.user.displayName)
+                this.sendData.addReport( this.form.controls['reason'].value, this.data.spotId, this.user.uid, 'reported', this.data.spot_country, this.data.spot_name, this.user.displayName)
                 .then( (response: any) => {
                   this.disabled = false;
                   this._snackBar.open("Reported Spot", undefined, {

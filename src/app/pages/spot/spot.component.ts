@@ -1,3 +1,5 @@
+import { receiveData } from './shared/services/receiveData.service';
+import { sendData } from './shared/services/sendData.service';
 import { HttpClient } from '@angular/common/http';
 import { BreakpointObserver } from '@angular/cdk/layout';
 import { BaseSpotFormComponent } from 'src/app/shared/components/base-spot-form/base-spot-form.component';
@@ -7,15 +9,12 @@ import { Component, OnInit, ViewEncapsulation, Injector } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { AuthService } from 'src/app/shared/services/auth.service';
-import { SpotService } from 'src/app/pages/spot/shared/spot.service'; 
+import { SpotService } from 'src/app/pages/spot/shared/services/spot.service'; 
 import { geohashForLocation } from 'geofire-common';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { DialogShareComponent } from './dialog-share/dialog-share.component';
-import { TypesService } from 'src/app/shared/services/types.service';
-import { ConditionsService } from 'src/app/shared/services/conditions.service';
 import { QueryDocumentSnapshot, QuerySnapshot } from 'firebase/firestore';
-import { NotificationService } from 'src/app/shared/services/notification.service';
 import { Subscription } from 'rxjs';
 import { SharedService } from 'src/app/shared/services/shared.service';
 import { DataUrl, DOC_ORIENTATION, NgxImageCompressService, UploadResponse } from 'ngx-image-compress';
@@ -55,13 +54,12 @@ export class SpotComponent extends BaseSpotFormComponent implements OnInit {
     protected injector: Injector,
     protected route: ActivatedRoute,
     protected router: Router,
+    protected sendData: sendData,
+    protected receiveData: receiveData,
     protected fb: FormBuilder,
     protected authService: AuthService,
     protected _snackBar: MatSnackBar,
-    protected notification: NotificationService,
     protected dialog: MatDialog,
-    protected typesService: TypesService,
-    protected conditionsService: ConditionsService, 
     protected httpClient: HttpClient,
     protected sharedService: SharedService,
     protected imageCompress: NgxImageCompressService, 
@@ -69,7 +67,7 @@ export class SpotComponent extends BaseSpotFormComponent implements OnInit {
     protected breakpointObserver: BreakpointObserver, 
     protected navbarService: NavbarService
     ) {
-      super(injector, route, router, fb, authService, _snackBar, notification, dialog, typesService, conditionsService, httpClient,
+      super(injector, route, router, fb, authService, _snackBar, dialog, httpClient,
         sharedService, imageCompress, spotService, breakpointObserver, navbarService)
       this.user = authService.getUser();
   }
@@ -162,30 +160,30 @@ export class SpotComponent extends BaseSpotFormComponent implements OnInit {
         this.router.navigate(['/'])
       }
     }
-    if(this.spotService.readSearchBar()){
+    if(this.receiveData.readSearchBar()){
       document.getElementById('fileInput')?.click()
     } 
   }
 
   getTypes(){
-    this.typesService.getTypes().then( (result: QuerySnapshot) => {
+    this.receiveData.getTypes().then( (result: QuerySnapshot) => {
       result.forEach( (res:QueryDocumentSnapshot) =>{
         this.dataTypes.push(res.data())
       });
     }).catch( err => {
       //console.log(err);
-      this.notification.notify("Failed to get types, try again later!", 4000)
+      this.sharedService.notify("Failed to get types, try again later!", 4000)
     });
   }
 
   getConditions(){
-    this.conditionsService.getConditions().then( (result: QuerySnapshot) => {
+    this.receiveData.getConditions().then( (result: QuerySnapshot) => {
       result.forEach( (res:QueryDocumentSnapshot) =>{
         this.dataConditions.push(res.data())
       });
     }).catch( err => {
       //console.log(err);
-      this.notification.notify("Failed to get conditions, try again later!", 4000)
+      this.sharedService.notify("Failed to get conditions, try again later!", 4000)
     });
   }
   
@@ -346,7 +344,7 @@ export class SpotComponent extends BaseSpotFormComponent implements OnInit {
 
       let response = await this.spotService.createSpot(spot, this.previews, this.thumbnail);
       if(response.status){
-        this.spotservice.addModeration(response.uid, spot.name,'created', spot.user_uid, spot.address.country, this.user.displayName);
+        this.sendData.addModeration(response.uid, spot.name,'created', spot.user_uid, spot.address.country, this.user.displayName);
         this.disabled = false;
         this._snackBar.open("Spot registered successfully", undefined, {
           duration: 2000,

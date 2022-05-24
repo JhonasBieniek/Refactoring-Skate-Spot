@@ -1,4 +1,6 @@
-import { SpotService } from '../../shared/spot.service';
+import { receiveData } from './../../shared/services/receiveData.service';
+import { sendData } from './../../shared/services/sendData.service';
+import { SpotService } from '../../shared/services/spot.service';
 import { Component, Input, OnInit } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Star } from '../../shared/models/star.model';
@@ -7,7 +9,7 @@ import { onSnapshot} from '@firebase/firestore';
 import { Unsubscribe } from '@firebase/util';
 import { AuthService } from 'src/app/shared/services/auth.service';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
-import { ConfirmationDialogComponent } from 'src/app/shared/confirmation-dialog/confirmation-dialog.component';
+import { ConfirmationDialogComponent } from 'src/app/shared/components/confirmation-dialog/confirmation-dialog.component';
 import { SigninComponent } from 'src/app/core/components/signin/signin.component';
 import { StarReviewAddComponent } from '../star-review-add/star-review-add.component';
 
@@ -26,12 +28,12 @@ export class StarReviewComponent implements OnInit {
   avgRating: number = 0;
   //user: any;
 
-  constructor(private spotService: SpotService, public authService: AuthService, private dialog: MatDialog) {
+  constructor(private spotService: SpotService, public authService: AuthService, private dialog: MatDialog, private sendData: sendData, private receiveData: receiveData) {
     //this.user = authService.getUser();
   }
 
   ngOnInit() {
-    this.unsubscribe = onSnapshot(this.spotService.getSpotStars(this.spotId), (snapshot) => {
+    this.unsubscribe = onSnapshot(this.receiveData.getSpotStars(this.spotId), (snapshot) => {
       snapshot.docChanges().forEach((change) => {
         // console.log(change.doc.data())
         if (change.type === "added") {
@@ -99,9 +101,9 @@ export class StarReviewComponent implements OnInit {
   starHandler(value:number) {
     if(this.authService?.user != null){
       if(this.getMyRating() == 0){
-        this.spotService.setStar(this.authService?.user.uid, this.spotId, value);
+        this.sendData.setStar(this.authService?.user.uid, this.spotId, value);
       }else{
-        this.spotService.updateStar(this.authService?.user.uid, this.spotId, value);
+        this.sendData.updateStar(this.authService?.user.uid, this.spotId, value);
       }
       //this.spotService.setStar(this.authService?.user.uid, this.spotId, value, this.getMyRating() > 0 ? true : false);
       //this.myRatingValue = value;
@@ -134,9 +136,9 @@ export class StarReviewComponent implements OnInit {
             //this.user = this.authService.getUser();
             if(this.authService?.user.uid != null){
               if(this.getMyRating() == 0){
-                this.spotService.setStar(this.authService?.user.uid, this.spotId, value);
+                this.sendData.setStar(this.authService?.user.uid, this.spotId, value);
               }else{
-                this.spotService.updateStar(this.authService?.user.uid, this.spotId, value);
+                this.sendData.updateStar(this.authService?.user.uid, this.spotId, value);
               }
               //this.myRatingValue = value
             }

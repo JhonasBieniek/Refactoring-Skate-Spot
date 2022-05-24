@@ -3,12 +3,9 @@ import { BreakpointObserver } from '@angular/cdk/layout';
 import { NgxImageCompressService } from 'ngx-image-compress';
 import { SharedService } from '../../services/shared.service';
 import { HttpClient } from '@angular/common/http';
-import { ConditionsService } from '../../services/conditions.service';
-import { TypesService } from '../../services/types.service';
 import { MatDialog } from '@angular/material/dialog';
-import { NotificationService } from '../../services/notification.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { SpotService } from '../../../pages/spot/shared/spot.service';
+import { SpotService } from '../../../pages/spot/shared/services/spot.service';
 import { AuthService } from '../../services/auth.service';
 
 import { FormBuilder, FormGroup } from '@angular/forms';
@@ -32,10 +29,7 @@ export abstract class BaseSpotFormComponent implements OnInit {
         protected fb: FormBuilder,
         protected authService: AuthService,
         protected _snackBar: MatSnackBar,
-        protected notification: NotificationService,
         protected dialog: MatDialog,
-        protected typesService: TypesService,
-        protected conditionsService: ConditionsService,
         protected httpClient: HttpClient,
         protected sharedService: SharedService,
         protected imageCompress: NgxImageCompressService,
@@ -67,7 +61,7 @@ export abstract class BaseSpotFormComponent implements OnInit {
               this.resourceForm.patchValue(this.data)
               this.disabled = false;
             } else {
-              this.notification.notify("Spot not Found !", 4000);
+              this.sharedService.notify("Spot not Found !", 4000);
               this.router.navigate(['/'])
             }
           });

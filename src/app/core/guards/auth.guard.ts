@@ -4,7 +4,7 @@ import { ActivatedRouteSnapshot, CanActivate, Router, RouterStateSnapshot, UrlTr
 import { Observable } from 'rxjs';
 import { SigninComponent } from '../components/signin/signin.component';
 import { AuthService } from '../../shared/services/auth.service';
-import { NotificationService } from '../../shared/services/notification.service';
+import { SharedService } from 'src/app/shared/services/shared.service';
 
 @Injectable({
   providedIn: 'root'
@@ -14,7 +14,7 @@ export class AuthGuard implements CanActivate {
     public authService: AuthService,
     public router: Router,
     private dialog: MatDialog,
-    private notification: NotificationService
+    private sharedService: SharedService
   ) { }
 
   canActivate(next: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<boolean> | Promise<boolean> | boolean {
@@ -45,7 +45,7 @@ export class AuthGuard implements CanActivate {
     }else if(user !== null && user.emailVerified != false){
       return true;
     } else if(user !== null && user.emailVerified == false){
-      this.notification.notify("Check your email before proceeding!.", 4000);
+      this.sharedService.notify("Check your email before proceeding!.", 4000);
       return false;
     } else {
       return false;

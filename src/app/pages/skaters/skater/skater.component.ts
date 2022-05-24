@@ -4,7 +4,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { AuthService } from 'src/app/shared/services/auth.service';
 import { SkaterService } from 'src/app/pages/skaters/shared/skater.service';
-import { SpotService } from 'src/app/pages/spot/shared/spot.service';
+import { SpotService } from 'src/app/pages/spot/shared/services/spot.service';
 import { Skater } from 'src/app/pages/skaters/shared/skater.model';
 import {COMMA, ENTER} from '@angular/cdk/keycodes';
 import { MatChipInputEvent } from '@angular/material/chips';

@@ -3,8 +3,7 @@ import { FormBuilder, FormGroup, ValidationErrors, ValidatorFn, Validators } fro
 import { MatDialog, MatDialogConfig, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { QueryDocumentSnapshot, QuerySnapshot } from 'firebase/firestore';
 import { AuthService } from 'src/app/shared/services/auth.service';
-import { NotificationService } from 'src/app/shared/services/notification.service';
-import { terms, TermsService } from 'src/app/shared/services/termsConditions.service';
+import { SharedService } from 'src/app/shared/services/shared.service';
 
 @Component({
   selector: 'app-signup-email',
@@ -19,8 +18,8 @@ export class SignupEmailComponent implements OnInit {
   disabled: boolean = false;
   
   constructor(public authService: AuthService, private fb: FormBuilder, public dialogRef: MatDialogRef<SignupEmailComponent>, public dialog: MatDialog,
-    private ngZone: NgZone, public termsService: TermsService, private notification: NotificationService) { 
-      this.termsService.getTerms().then((results: QuerySnapshot) => {
+    private ngZone: NgZone, private sharedService: SharedService) { 
+      this.sharedService.getTerms().then((results: QuerySnapshot) => {
         let docs: any[] = [];
         results.forEach((result: QueryDocumentSnapshot) => {
           let data = result.data();
@@ -72,7 +71,7 @@ export class SignupEmailComponent implements OnInit {
     }else{
       this.form.markAllAsTouched();
       if(!every){
-        this.notification.notify("All terms need be checked!", 1500);
+        this.sharedService.notify("All terms need be checked!", 1500);
       }
     }
     

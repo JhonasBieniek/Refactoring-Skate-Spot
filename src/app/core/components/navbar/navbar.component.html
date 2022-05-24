@@ -29,7 +29,7 @@
             </div> -->
         </mat-sidenav>
         <mat-sidenav-content>
-                <div *ngIf="loaderservice.isLoading | async" class="loader-container">
+                <div *ngIf="sharedService.isLoading | async" class="loader-container">
                     <mat-spinner style="top:50%; left:50%"></mat-spinner>
                 </div>
                 <div class="container">

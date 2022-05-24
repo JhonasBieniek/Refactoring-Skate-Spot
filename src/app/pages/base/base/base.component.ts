@@ -1,4 +1,5 @@
-import { BaseService } from './../../../core/services/base.service';
+import { receiveData } from './../../spot/shared/services/receiveData.service';
+import { GeolocationAndConfig } from '../../../shared/services/geolocation-config.service';
 import { Component, ElementRef, OnInit, QueryList, ViewChild, ViewChildren, ViewEncapsulation } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { FormBuilder } from '@angular/forms';
@@ -6,14 +7,12 @@ import { AuthService } from 'src/app/shared/services/auth.service';
 import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute, Router } from '@angular/router';
 import { GoogleMap, MapInfoWindow, MapMarker } from '@angular/google-maps';
-import { SpotService } from '../../spot/shared/spot.service';
+import { SpotService } from '../../spot/shared/services/spot.service';
 import { Spot } from '../../spot/shared/models/spot.model';
 import { Title } from '@angular/platform-browser';
-import { NotificationService } from 'src/app/shared/services/notification.service';
 import { Platform } from '@angular/cdk/platform';
 import { debounceTime } from 'rxjs/operators';
 import { MapsAPILoader } from '@agm/core';
-import { TypesService } from 'src/app/shared/services/types.service';
 import { SharedService } from 'src/app/shared/services/shared.service';
 import { NavbarService } from 'src/app/shared/services/navbar.service';
 
@@ -30,13 +29,13 @@ export interface conditions {
   styleUrls: ['./base.component.scss'],
   encapsulation: ViewEncapsulation.None,
 })
-export class BaseComponent extends BaseService implements OnInit {
+export class BaseComponent extends GeolocationAndConfig implements OnInit {
   @ViewChild(MapInfoWindow, { static: false }) info!: MapInfoWindow;
   @ViewChild(GoogleMap, { static: false }) map!: GoogleMap;
   @ViewChildren(MapMarker) myMarkers!: QueryList<google.maps.Marker>;
   @ViewChild('searchInput') searchElementRef!: ElementRef;
+  
   myStyles: google.maps.MapTypeStyle[] = [];
-
   zoom = 22;
   platformOpeating: any
 
@@ -44,20 +43,19 @@ export class BaseComponent extends BaseService implements OnInit {
     protected fb: FormBuilder,
     protected router: Router,
     protected title: Title,
+    protected receiveData: receiveData,
     protected mapsAPILoader: MapsAPILoader,
     protected breakpointObserver: BreakpointObserver,
     protected navbarService: NavbarService,
     protected authService: AuthService,
     protected dialog: MatDialog,
     protected spotService: SpotService,
-    protected notification: NotificationService,
     protected platform: Platform,
-    protected typesService: TypesService,
     protected sharedService: SharedService,
     protected route: ActivatedRoute,
     protected http: HttpClient
   ) {
-    super(fb, router, title, mapsAPILoader, breakpointObserver, navbarService, authService, dialog, spotService, notification, platform, typesService, sharedService, route, http)
+    super(fb, router, title, receiveData ,mapsAPILoader, breakpointObserver, navbarService, authService, dialog, spotService, platform, sharedService, route, http)
     this.platformOpeating = platform
     this.getTypes();
   }
@@ -273,7 +271,7 @@ export class BaseComponent extends BaseService implements OnInit {
       }, { timeout: 10000 });
     } else {
       this.getError = "Não possui geolocation";
-      this.notification.notify("Not found Geolocation!", 2000);
+      this.sharedService.notify("Not found Geolocation!", 2000);
     }
   }
 
@@ -348,7 +346,7 @@ export class BaseComponent extends BaseService implements OnInit {
   searchEnter(value: string) {
     let searchValue = (this.form.get('search')?.value)?.toLowerCase().trim();
     if (value.length == 0) {
-      this.notification.notify('Please type something', 3000);
+      this.sharedService.notify('Please type something', 3000);
     } else {
       setTimeout(() => {
         if (this.spots$.length == 0) {
@@ -364,7 +362,7 @@ export class BaseComponent extends BaseService implements OnInit {
         }
         if (this.searchSpot) {
           if (this.searchResult.length == 0) {
-            this.notification.notify('Não foi possivel encontrar nenhum local', 3000);
+            this.sharedService.notify('Não foi possivel encontrar nenhum local', 3000);
           } else {
             this.autoCompleteSelect(this.searchResult[0])
           }

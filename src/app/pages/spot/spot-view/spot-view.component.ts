@@ -1,3 +1,5 @@
+import { receiveData } from './../shared/services/receiveData.service';
+import { sendData } from './../shared/services/sendData.service';
 import { Component, Inject, OnInit, ViewEncapsulation } from '@angular/core';
 import { MatDialog, MatDialogConfig, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -10,8 +12,8 @@ import { SigninComponent } from 'src/app/core/components/signin/signin.component
 import { AuthService } from 'src/app/shared/services/auth.service';
 import { SharedService } from 'src/app/shared/services/shared.service';
 import { SkaterService } from 'src/app/pages/skaters/shared/skater.service';
-import { SpotService } from 'src/app/pages/spot/shared/spot.service';
-import { ConfirmationDialogComponent } from 'src/app/shared/confirmation-dialog/confirmation-dialog.component';
+import { SpotService } from 'src/app/pages/spot/shared/services/spot.service';
+import { ConfirmationDialogComponent } from 'src/app/shared/components/confirmation-dialog/confirmation-dialog.component';
 import { Skater } from 'src/app/pages/skaters/shared/skater.model';
 import { DialogShareComponent } from '../dialog-share/dialog-share.component';
 import { ReportAddComponent } from './report-add/report-add.component';
@@ -37,7 +39,7 @@ export class SpotViewComponent implements OnInit {
   unsubscribe!: Unsubscribe;
 
   constructor(private router: Router, private dialog: MatDialog, private route: ActivatedRoute, private spotService: SpotService, private _snackBar: MatSnackBar,
-    private title: Title, private meta: Meta, private skaterService: SkaterService, public authService: AuthService, private sharedService: SharedService,) { // @Inject(MAT_DIALOG_DATA) public data: any
+    private title: Title, private meta: Meta, private skaterService: SkaterService, public authService: AuthService, private sendData: sendData, private receiveData: receiveData, private sharedService: SharedService,) { // @Inject(MAT_DIALOG_DATA) public data: any
     //library.addIconPacks(fas, fab);
     //library.addIcons(faShare, faTimesCircle, faCircle);
     this.currentUrl = this.currentUrl + route.snapshot.params['id'];
@@ -83,7 +85,7 @@ export class SpotViewComponent implements OnInit {
   }
 
   getStars(spot_uid: string){
-    this.unsubscribe = onSnapshot(this.spotService.getSpotStars(spot_uid), (snapshot) => {
+    this.unsubscribe = onSnapshot(this.receiveData.getSpotStars(spot_uid), (snapshot) => {
       snapshot.docChanges().forEach((change) => {
         //console.log(change.doc.data());
         if (change.type === "added") {
@@ -99,7 +101,7 @@ export class SpotViewComponent implements OnInit {
   }
 
   getReviews(spot_uid: string){
-    this.unsubscribe = onSnapshot(this.spotService.getSpotReviews(spot_uid), (snapshot) => {
+    this.unsubscribe = onSnapshot(this.receiveData.getSpotReviews(spot_uid), (snapshot) => {
       snapshot.docChanges().forEach((change) => {
         if (change.type === "added") {
           this.reviews.push({id: change.doc.id, ...change.doc.data()});

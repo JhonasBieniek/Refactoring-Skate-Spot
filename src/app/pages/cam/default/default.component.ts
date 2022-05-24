@@ -2,7 +2,7 @@ import { AfterViewInit, Component, ElementRef, OnInit, ViewChild, ViewEncapsulat
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Observable } from 'rxjs';
-import { NotificationService } from 'src/app/shared/services/notification.service';
+import { SharedService } from 'src/app/shared/services/shared.service';
 import { environment } from 'src/environments/environment';
 
 @Component({
@@ -45,7 +45,7 @@ export class DefaultComponent implements AfterViewInit {
 
   constructor(private fb: FormBuilder,
     private router: Router,
-    private notification: NotificationService
+    private sharedService: SharedService
     ){
     this.form = this.fb.group({
       city: [null,Validators.required],
@@ -382,7 +382,7 @@ export class DefaultComponent implements AfterViewInit {
       this.form.markAllAsTouched();
 
       if(this.captures.length == 0){
-        this.notification.notify("Need at least 1 picture!", 3000)
+        this.sharedService.notify("Need at least 1 picture!", 3000)
       }
     }
   }

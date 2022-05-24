@@ -1,14 +1,22 @@
+import { CollectionReference, collection, getFirestore, query, orderBy, where, getDocs } from 'firebase/firestore';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { HttpRequest, HttpHandler, HttpEvent } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
-import { Observable, Subject} from 'rxjs';
-import { filter } from 'rxjs/operators';
+import { Observable, Subject, BehaviorSubject } from 'rxjs';
+import { filter, finalize } from 'rxjs/operators';
 
 @Injectable({
     providedIn: 'root'
 })
 export class SharedService {
 
-    constructor(private router: Router) {
+    private urls = new BehaviorSubject<string[]>(['']);
+    private db = getFirestore();
+    terms_conditions: CollectionReference;
+
+    constructor(private router: Router, private _snackBar: MatSnackBar) {
+        this.terms_conditions = collection(this.db, '/terms_conditions/');
         this.currentUrl = this.router.url;
         router.events.subscribe(event => {
             if (event instanceof NavigationEnd) {        
@@ -17,6 +25,8 @@ export class SharedService {
             };
         });
     }
+
+    public isLoading: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
 
     //* variables to request controller action
     private subject = new Subject<any>();
@@ -39,6 +49,28 @@ export class SharedService {
     private previousUrl!: string;
     private currentUrl!: string;
     //* end variables 
+
+    intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
+        this.isLoading.next(true);
+    
+        return next.handle(req).pipe(
+          finalize(
+            () => {
+              this.isLoading.next(false);
+            }
+          )
+        );
+    }
+
+    nextUrl(url: string[]){
+        this.urls.next(url)
+    }
+      
+    getPreviousUrl(){
+        let url = this.urls.getValue();
+        url.splice(url.length-1);
+        return url[url.length-1];
+    }  
 
     sendClickEvent(){
         this.subject.next();
@@ -69,8 +101,17 @@ export class SharedService {
     getLastLatLng():google.maps.LatLng {
         return this.LastLatLng;
     }
-
-    getPreviousUrl(){
-        return this.previousUrl;
+    
+    getTerms() {
+        const q = query(collection(this.db, "terms_conditions"), orderBy("name", "asc"), where("status", "==", true));
+        return getDocs(q);
     }
+
+    notify(message:string, duration:number){
+        this._snackBar.open(message, undefined, {
+          duration: duration,
+          }
+        );
+    }
+
 }

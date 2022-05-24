@@ -6,7 +6,7 @@ import { HttpClientJsonpModule, HttpClientModule } from '@angular/common/http';
 import {MatButtonModule} from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSidenavModule } from '@angular/material/sidenav';
-import { ConfirmationDialogComponent } from './confirmation-dialog/confirmation-dialog.component';
+import { ConfirmationDialogComponent } from './components/confirmation-dialog/confirmation-dialog.component';
 import { BaseSpotFormComponent } from './components/base-spot-form/base-spot-form.component';
 
 

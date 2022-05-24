@@ -1,4 +1,3 @@
-import { RouteHelperService } from '../../../shared/services/route-helper.service';
 import { NumberSymbol } from '@angular/common';
 import { Component, Input, OnInit } from '@angular/core';
 import { MatBottomSheet } from '@angular/material/bottom-sheet';
@@ -6,14 +5,11 @@ import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { Router, RouterLinkActive } from '@angular/router';
 import { DataUrl, DOC_ORIENTATION, NgxImageCompressService } from 'ngx-image-compress';
 import { AuthService } from '../../../shared/services/auth.service';
-import { LoaderService } from '../../../shared/services/loader.service';
-import { NotificationService } from '../../../shared/services/notification.service';
 import { SharedService } from '../../../shared/services/shared.service';
 import { SigninComponent } from '../signin/signin.component';
 import { NavbarService } from '../../../shared/services/navbar.service';
 import { BreakpointObserver, BreakpointState } from '@angular/cdk/layout';
-import { BaseComponent } from 'src/app/pages/base/base/base.component';
-import { SpotService } from '../../../pages/spot/shared/spot.service';
+import { SpotService } from '../../../pages/spot/shared/services/spot.service';
 
 @Component({
   selector: 'app-navbar',
@@ -38,12 +34,8 @@ export class NavbarComponent {
     public breakpointObserver: BreakpointObserver,
     public authService: AuthService,
     public navbarService: NavbarService,
-    public routeService: RouteHelperService,
-    // public basecomponent: BaseComponent,
     private _bottomSheet: MatBottomSheet,
     private dialog: MatDialog,
-    public loaderservice: LoaderService,
-    private notification: NotificationService,
     public navRouter: Router,
     public sharedService: SharedService,
     private imageCompress: NgxImageCompressService,
@@ -192,11 +184,11 @@ export class NavbarComponent {
         // }
       }, (error) => {
         console.log(error)
-        this.notification.notify(error.message, 2000);
+        this.sharedService.notify(error.message, 2000);
       }, { timeout: 10000 });
     } else {
       // this.getError = "Não possui geolocation";
-      this.notification.notify("Not found Geolocation!", 2000);
+      this.sharedService.notify("Not found Geolocation!", 2000);
     }
   }
 
@@ -346,28 +338,12 @@ export class NavbarComponent {
   }
 
   backPreviousUrl(){
-    let previousUrl = this.routeService.getPreviousUrl();
+    let previousUrl = this.sharedService.getPreviousUrl();
     if(previousUrl === undefined){
       this.navRouter.navigate(['/'])
     } else {
       this.navRouter.navigate([previousUrl])
     }
-    // // console.log(this.sharedService.getPreviousUrl())
-    // if(!this.sharedService.getLastBounds() && this.sharedService.getPreviousUrl() === '/'){
-    //   this.notification.notify("There is no previous page!", 1000)
-    // }else if(this.sharedService.getLastBounds() && this.sharedService.getPreviousUrl() === '/'){
-    //   this.navRouter.navigate(['/'],{
-    //     state: {
-    //       data: {
-    //         bounds: this.sharedService.getLastBounds().toJSON(),
-    //         latLng: this.sharedService.getLastLatLng().toJSON()
-    //       }
-    //     }
-    //   });
-    // }else{
-    //   // console.log(this.sharedService.getPreviousUrl())
-    //   this.navRouter.navigate([this.sharedService.getPreviousUrl()]);
-    // }
   }
 
   spotEdit(){

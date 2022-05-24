@@ -1,4 +1,4 @@
-import { RouteHelperService } from './shared/services/route-helper.service';
+import { SharedService } from './shared/services/shared.service';
 import { NavigationEnd, NavigationStart, Router, Event, NavigationError } from '@angular/router';
 import { Component } from '@angular/core';
 
@@ -11,7 +11,7 @@ export class AppComponent {
   title = 'SkateBoardOnly';
   urls: string[] = [];
 
-  constructor(private router: Router, public routeService: RouteHelperService) {
+  constructor(private router: Router, public sharedService: SharedService) {
     this.router.events.subscribe((event: Event) => {
       if (event instanceof NavigationEnd) {
         if(event.url == '/'){
@@ -24,11 +24,11 @@ export class AppComponent {
         if(this.urls.length > 0){
           if(this.urls.indexOf(event.url) === -1){
             this.urls.push(event.url)
-            this.routeService.nextUrl(this.urls)
+            this.sharedService.nextUrl(this.urls)
           }
         } else {
           this.urls.push(event.url) 
-          this.routeService.nextUrl(this.urls)
+          this.sharedService.nextUrl(this.urls)
         }
       }
       if (event instanceof NavigationError) {

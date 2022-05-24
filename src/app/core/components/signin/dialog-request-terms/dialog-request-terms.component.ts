@@ -2,9 +2,8 @@ import { Component, Inject, OnInit } from '@angular/core';
 import { MatDialog, MatDialogConfig, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { FirebaseError } from 'firebase/app';
 import { arrayUnion, QueryDocumentSnapshot, QuerySnapshot } from 'firebase/firestore';
-import { NotificationService } from 'src/app/shared/services/notification.service';
+import { SharedService } from 'src/app/shared/services/shared.service';
 import { SkaterService } from 'src/app/pages/skaters/shared/skater.service';
-import { TermsService } from 'src/app/shared/services/termsConditions.service';
 import { DialogTerms } from '../signup-email/signup-email.component';
 
 @Component({
@@ -19,15 +18,14 @@ export class DialogRequestTermsComponent {
 
   constructor(
     public dialogRef: MatDialogRef<DialogRequestTermsComponent>,
-    private termsService: TermsService,
     @Inject(MAT_DIALOG_DATA) public data: any,
     public dialog: MatDialog,
     private skaterService: SkaterService,
-    private notification: NotificationService
+    private sharedService: SharedService
   ) {
     dialogRef.disableClose = true;
     this.terms = data.terms;
-    // this.termsService.getTerms().then((results: QuerySnapshot) => {
+    // this.sharedService.getTerms().then((results: QuerySnapshot) => {
     //   let docs: any[] = [];
     //   results.forEach((result: QueryDocumentSnapshot) => {
     //     let term = result.data();
@@ -72,15 +70,15 @@ export class DialogRequestTermsComponent {
       this.disabled = true;
       this.skaterService.updateSkater(this.data.user_uid, { terms: arrayUnion(...this.terms) }).then( ()=>{
         this.disabled = false;
-        this.notification.notify("Terms saved successfully!", 2000);
+        this.sharedService.notify("Terms saved successfully!", 2000);
         this.dialogRef.close();
       }).catch( (err: FirebaseError) => {
         this.disabled = false;
-        this.notification.notify("Failed to save tems!, message error: "+ err.message, 2000);
+        this.sharedService.notify("Failed to save tems!, message error: "+ err.message, 2000);
         this.dialogRef.close();
       });
     }else{
-      this.notification.notify("All terms must be accepted !", 2000);
+      this.sharedService.notify("All terms must be accepted !", 2000);
     }
     
   }

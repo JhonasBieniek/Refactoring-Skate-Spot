@@ -1,16 +1,15 @@
+import { sendData } from './../shared/services/sendData.service';
+import { receiveData } from './../shared/services/receiveData.service';
 import { NavbarService } from '../../../shared/services/navbar.service';
 import { Component, Injector, OnInit, ViewEncapsulation } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from 'src/app/shared/services/auth.service';
-import { SpotService } from 'src/app/pages/spot/shared/spot.service'; 
+import { SpotService } from 'src/app/pages/spot/shared/services/spot.service'; 
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { NotificationService } from 'src/app/shared/services/notification.service';
 import { arrayRemove, arrayUnion, QueryDocumentSnapshot, QuerySnapshot } from 'firebase/firestore';
-import { ConfirmationDialogComponent } from 'src/app/shared/confirmation-dialog/confirmation-dialog.component';
-import { TypesService } from 'src/app/shared/services/types.service';
-import { ConditionsService } from 'src/app/shared/services/conditions.service';
+import { ConfirmationDialogComponent } from 'src/app/shared/components/confirmation-dialog/confirmation-dialog.component';
 import { HttpClient } from '@angular/common/http';
 import { SharedService } from 'src/app/shared/services/shared.service';
 import { Subscription } from 'rxjs';
@@ -45,11 +44,10 @@ export class SpotEditComponent extends BaseSpotFormComponent implements OnInit {
     protected router: Router,
     protected fb: FormBuilder,
     protected authService: AuthService,
+    protected receiveData: receiveData,
+    protected sendData: sendData,
     protected _snackBar: MatSnackBar,
-    protected notification: NotificationService,
     protected dialog: MatDialog,
-    protected typesService: TypesService,
-    protected conditionsService: ConditionsService, 
     protected httpClient: HttpClient,
     protected sharedService: SharedService,
     protected imageCompress: NgxImageCompressService, 
@@ -57,7 +55,7 @@ export class SpotEditComponent extends BaseSpotFormComponent implements OnInit {
     protected breakpointObserver: BreakpointObserver, 
     protected navbarService: NavbarService
     ) {
-      super(injector, route, router, fb, authService, _snackBar, notification, dialog, typesService, conditionsService, httpClient,
+      super(injector, route, router, fb, authService, _snackBar, dialog, httpClient,
         sharedService, imageCompress, spotService, breakpointObserver, navbarService)
       this.user = authService.getUser();
   }
@@ -102,7 +100,7 @@ export class SpotEditComponent extends BaseSpotFormComponent implements OnInit {
           });
           setTimeout(()=>{ this.disabled = false; this.start = true}, 1000);
         } else {
-          this.notification.notify("Spot not Found !", 4000);
+          this.sharedService.notify("Spot not Found !", 4000);
           this.router.navigate(['/'])
         }
       });
@@ -113,7 +111,7 @@ export class SpotEditComponent extends BaseSpotFormComponent implements OnInit {
   }
 
   getTypes(){
-    this.typesService.getTypes().then( (result: QuerySnapshot) => {
+    this.receiveData.getTypes().then( (result: QuerySnapshot) => {
       result.forEach( (res:QueryDocumentSnapshot) =>{
         this.dataTypes.push(res.data());
       });
@@ -123,12 +121,12 @@ export class SpotEditComponent extends BaseSpotFormComponent implements OnInit {
       });
     }).catch( err => {
       //console.log(err);
-      this.notification.notify("Failed to get types, try again later!", 4000)
+      this.sharedService.notify("Failed to get types, try again later!", 4000)
     });
   }
 
   getConditions(){
-    this.conditionsService.getConditions().then( (result: QuerySnapshot) => {
+    this.receiveData.getConditions().then( (result: QuerySnapshot) => {
       result.forEach( (res:QueryDocumentSnapshot) =>{
         this.dataConditions.push(res.data());
       });
@@ -140,7 +138,7 @@ export class SpotEditComponent extends BaseSpotFormComponent implements OnInit {
 
     }).catch( err => {
       //console.log(err);
-      this.notification.notify("Failed to get conditions, try again later!", 4000)
+      this.sharedService.notify("Failed to get conditions, try again later!", 4000)
     });
   }
 
@@ -205,21 +203,21 @@ export class SpotEditComponent extends BaseSpotFormComponent implements OnInit {
             let imageCover = this.dataPictures[index].cover;
             this.dataPictures.splice(index,1);
             if(imageCover === true){
-              this.notification.notify("Picture deleted successfully, setting new cover !", 4000);
+              this.sharedService.notify("Picture deleted successfully, setting new cover !", 4000);
               this.setCover(0);
             }else{
               this.disabled = false;
-              this.notification.notify("Picture deleted successfully !", 4000);
+              this.sharedService.notify("Picture deleted successfully !", 4000);
             }
             
           }).catch( (error)=>{
             this.disabled = false;
-            this.notification.notify("An error occurred, try again later!", 4000);
+            this.sharedService.notify("An error occurred, try again later!", 4000);
             //console.log(error);
           });
         }).catch((error) => {
           this.disabled = false;
-          this.notification.notify("An error occurred, try again later!", 4000);
+          this.sharedService.notify("An error occurred, try again later!", 4000);
           //.log(error);
         });
       }
@@ -239,16 +237,16 @@ export class SpotEditComponent extends BaseSpotFormComponent implements OnInit {
         // , status: 'image modified'
         //this.spotservice.addModeration(this.resourceForm.get('uid')?.value, this.data.name,'image modified');
         this.disabled = false;
-        this.notification.notify("Thumbnail updated successfully !", 4000);
+        this.sharedService.notify("Thumbnail updated successfully !", 4000);
         
       }).catch( (error)=>{
         this.disabled = false;
-        this.notification.notify("An error occurred, try again later!", 4000);
+        this.sharedService.notify("An error occurred, try again later!", 4000);
         //console.log(error);
       });
     }).catch((error)=> {
       this.disabled = false;
-      this.notification.notify("An error occurred, try again later!", 4000);
+      this.sharedService.notify("An error occurred, try again later!", 4000);
       //console.log(error);
     });
   }
@@ -262,21 +260,21 @@ export class SpotEditComponent extends BaseSpotFormComponent implements OnInit {
       this.spotservice.uploadImageAsPromise(result, path, orientation, cover).then((response) => {
         this.spotservice.updateSpot(this.resourceForm.get('uid')?.value, { pictures: arrayUnion( response )}).then((responsePic) => {
           if(last == true) {
-            this.spotservice.addModeration(this.resourceForm.get('uid')?.value, this.data.name,'image modified', this.user.uid, this.resourceForm.get('address.country')?.value, this.user.displayName);
+            this.sendData.addModeration(this.resourceForm.get('uid')?.value, this.data.name,'image modified', this.user.uid, this.resourceForm.get('address.country')?.value, this.user.displayName);
             this.disabled = false;
-            this.notification.notify("Pictures updated successfully !", 4000);
+            this.sharedService.notify("Pictures updated successfully !", 4000);
           }
           this.dataPictures.push(response);
           if(cover) this.setCover(0);
           
         }).catch( (error)=>{
           this.disabled = false;
-          this.notification.notify("An error occurred, try again lateeer!", 4000);
+          this.sharedService.notify("An error occurred, try again lateeer!", 4000);
           console.log(error.message);
         });
       }).catch((error)=> {
         this.disabled = false;
-        this.notification.notify("An error occurred, try again later!", 4000);
+        this.sharedService.notify("An error occurred, try again later!", 4000);
         //console.log(error);
       });
     });
@@ -297,9 +295,9 @@ export class SpotEditComponent extends BaseSpotFormComponent implements OnInit {
       //let spot: Spot = this.resourceForm.value;
       //spot['status'] = 'infos modified';
       this.spotservice.updateSpot(this.resourceForm.get('uid')?.value, this.resourceForm.value).then((response) => {
-          this.spotservice.addModeration(this.resourceForm.get('uid')?.value, this.resourceForm.get('name')?.value,'infos modified', this.user.uid , this.resourceForm.get('address.country')?.value, this.user.displayName);
+          this.sendData.addModeration(this.resourceForm.get('uid')?.value, this.resourceForm.get('name')?.value,'infos modified', this.user.uid , this.resourceForm.get('address.country')?.value, this.user.displayName);
           this.disabled = false;
-          this.notification.notify("Spot updated successfully !", 4000);
+          this.sharedService.notify("Spot updated successfully !", 4000);
           //this.clickEventSubscription.unsubscribe();
           this.router.navigate(['/'],{
             state: {
@@ -312,13 +310,13 @@ export class SpotEditComponent extends BaseSpotFormComponent implements OnInit {
           });
       }).catch( (error)=>{
         this.disabled = false;
-        this.notification.notify("An error occurred, try again later!", 4000);
+        this.sharedService.notify("An error occurred, try again later!", 4000);
         console.log(error);
       });
     }else{
       this.resourceForm.markAllAsTouched();
       if(this.dataPictures.length == 0){
-        this.notification.notify("Need at least 1 pictures", 4000);
+        this.sharedService.notify("Need at least 1 pictures", 4000);
       }
     }
   }
@@ -350,12 +348,12 @@ export class SpotEditComponent extends BaseSpotFormComponent implements OnInit {
                   this.updateThumbnail(imgName, result, this.dataPictures[index].orientation, index);
                 }).catch((error)=>{
                   this.disabled = false;
-                  this.notification.notify("An error occurred, try again later!", 2000);
+                  this.sharedService.notify("An error occurred, try again later!", 2000);
                   //console.log(error);
                 });
               }).catch((error) => {
                 this.disabled = false;
-                this.notification.notify("An error occurred, try again later!", 2000);
+                this.sharedService.notify("An error occurred, try again later!", 2000);
                 //console.log(error);
               });
             };
@@ -364,7 +362,7 @@ export class SpotEditComponent extends BaseSpotFormComponent implements OnInit {
       }, err =>{
         //console.log(err);
         this.disabled = false;
-        this.notification.notify("An error occurred, try again later!", 2000);
+        this.sharedService.notify("An error occurred, try again later!", 2000);
       });
   }
 

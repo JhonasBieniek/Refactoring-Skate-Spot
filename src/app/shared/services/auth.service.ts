@@ -2,12 +2,11 @@ import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthProvider, createUserWithEmailAndPassword, FacebookAuthProvider, getAdditionalUserInfo, getAuth, GoogleAuthProvider, sendEmailVerification, sendPasswordResetEmail, signInWithEmailAndPassword, signInWithPopup, signOut, updateProfile, UserCredential } from 'firebase/auth';
 import { Skater } from 'src/app/pages/skaters/shared/skater.model';
-import { NotificationService } from './notification.service';
+import { SharedService } from './shared.service';
 import { SkaterService } from '../../pages/skaters/shared/skater.service';
 import { getFunctions, httpsCallable, connectFunctionsEmulator } from "firebase/functions";
 import { MatDialog } from '@angular/material/dialog';
 import { DialogRequestTermsComponent } from '../../core/components/signin/dialog-request-terms/dialog-request-terms.component';
-import { TermsService } from './termsConditions.service';
 import { QueryDocumentSnapshot, QuerySnapshot } from 'firebase/firestore';
 
 @Injectable({
@@ -22,9 +21,8 @@ export class AuthService {
   constructor(
     private router: Router,
     private skaterService: SkaterService,
-    private notification: NotificationService,
+    private sharedService: SharedService,
     private dialog: MatDialog,
-    private termsService: TermsService
   ) { 
     
   }
@@ -34,7 +32,7 @@ export class AuthService {
     return signInWithEmailAndPassword(getAuth(), email, password)
       .then((result: any) => 
       {
-        this.notification.notify("Welcome, "+ this.capitalizeWords(result.user.displayName !== null ? result.user.displayName : ''), 2000);
+        this.sharedService.notify("Welcome, "+ this.capitalizeWords(result.user.displayName !== null ? result.user.displayName : ''), 2000);
         this.termsValidation(result.user.uid);
         this.getUser();
         return {
@@ -73,7 +71,7 @@ export class AuthService {
         updateProfile(result.user,{
           displayName: userName
         });
-        this.notification.notify("Welcome, "+ this.capitalizeWords(userName), 2000);
+        this.sharedService.notify("Welcome, "+ this.capitalizeWords(userName), 2000);
         this.getUser();
         return {
           status: true,
@@ -102,7 +100,7 @@ export class AuthService {
   termsValidation(user_uid:string){
     this.skaterService.getSkaterView(this.user.uid).then( (docSnap) => {
         let skater = docSnap.data();
-        this.termsService.getTerms().then((results: QuerySnapshot) => {
+        this.sharedService.getTerms().then((results: QuerySnapshot) => {
           let terms: any[] = [];
           results.forEach((result: QueryDocumentSnapshot) => {
             let data = result.data();
@@ -183,7 +181,7 @@ export class AuthService {
           this.termsValidation(result.user.uid);
         }
 
-        this.notification.notify("Welcome, "+ this.capitalizeWords(result.user.displayName !== null ? result.user.displayName : ''), 2000);
+        this.sharedService.notify("Welcome, "+ this.capitalizeWords(result.user.displayName !== null ? result.user.displayName : ''), 2000);
         this.getUser();
         return {
           status: true,
