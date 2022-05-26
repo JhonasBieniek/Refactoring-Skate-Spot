@@ -16,9 +16,10 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { SpotService } from '../../../pages/spot/shared/services/spot.service';
 import { AuthService } from '../../services/auth.service';
 
-import { FormBuilder, FormGroup } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, FormControl } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Directive, OnInit, Injector, Injectable } from '@angular/core';
+import { threadId } from 'worker_threads';
 
 @Injectable({
     providedIn: 'root'
@@ -30,7 +31,6 @@ export abstract class BaseSpotFormComponent implements OnInit {
     data: any;
     disabled: boolean = false;
 
-    dataPictures: any[] = [];
     start: boolean = false;
     historyData: any;
     selectedFiles: any[] = [];
@@ -39,7 +39,10 @@ export abstract class BaseSpotFormComponent implements OnInit {
     maxImgs: number = 9;
     dataTypes: any[] = [];
     dataConditions: any[] = [];
-    user!: any;
+    user: any;
+    deletedImagesIndex: any[] = [];
+
+    spotPictures: any[] = [];
 
     spotGeolocation: any;
     insertedFiles: number = 0;
@@ -70,24 +73,147 @@ export abstract class BaseSpotFormComponent implements OnInit {
     }
 
     ngOnInit(): void {
-        this.setCurrentAction();
-        this.buildResourceForm();
+        this.getData();
     }
 
     ngOnDestroy(): void {
         if (this.clickEventSubscription) this.clickEventSubscription.unsubscribe();
     }
 
-    protected setCurrentAction() {
-        if (this.router.url.includes('edit'))
-            this.currentAction = "edit"
-        else
-            this.currentAction = "new"
+    protected abstract getData(): any
+
+    protected buildResourceForm(data: any) {
+        this.disabled = true;
+        this.data = data
+        this.resourceForm = this.formBuilder.group({
+            uid: [this.data.uid !== null || this.data.uid !== undefined ? this.data.uid : null],
+            user: [this.user.displayName, Validators.required],
+            user_uid: [this.user.uid !== null || this.user.uid !== undefined ? this.user.uid : null],
+            name: [this.data.name !== null || this.data.name !== undefined ? this.data.name : null],
+            address: new FormGroup({
+                city: new FormControl(null, Validators.required),
+                state: new FormControl(null, Validators.required),
+                country: new FormControl(null, Validators.required),
+                point_of_interest: new FormControl(null),
+                postal_code: new FormControl(null),
+                route: new FormControl(null, Validators.required),
+                street_number: new FormControl(null),
+            }),
+            types: [null, Validators.required],
+            conditions: [null, Validators.required],
+            lat: [null, Validators.required],
+            lng: [null, Validators.required],
+            hash: [this.data.hash !== null || this.data.hash !== undefined ? this.data.hash : null],
+            status: [null],
+            created: [null],
+            modified: [null]
+        });
+        this.resourceForm.patchValue(this.data)
+        if (this.currentAction == "new") {
+            if (this.data.address.point_of_interest != '') {
+                this.resourceForm.get('name')?.setValue('Spot ' + this.data.address.point_of_interest);
+            } else if (this.data.address.route != '') {
+                this.resourceForm.get('name')?.setValue('Spot ' + this.data.address.route);
+            }
+        }
+        this.getTypes();
+        this.getConditions();
+        this.clickEventSubscription = this.sharedService.getClickEvent().subscribe(() => {
+            this.save();
+        });
+        setTimeout(() => { this.disabled = false; this.start = true }, 500);
+        console.log(this.spotPictures)
     }
 
-    protected abstract buildResourceForm(): void;
+    async save() {
+        if (this.previews.length > 0 && this.resourceForm.valid) {
+            this.disabled = true;
+            if (this.currentAction == "new") {
+                let hash = geohashForLocation([this.data.lat, this.data.lng]);
+                this.resourceForm.get('hash')?.setValue(hash)
+                this.resourceForm.get('status')?.setValue('active')
+                this.resourceForm.get('created')?.setValue(new Date())
+                this.resourceForm.get('modified')?.setValue(new Date())
+                this.spotService.createSpot(this.resourceForm.value, this.previews, this.thumbnail).then((response) => {
+                    this.sendData.addModeration(response.uid, this.resourceForm.get('name')?.value, 'created', this.user.uid, this.resourceForm.get('address.country')?.value, this.user.displayName);
+                    this.disabled = false;
+                    this._snackBar.open("Spot registered successfully", undefined, {
+                        duration: 2000,
+                    }
+                    );
+                    let dialogConfig = new MatDialogConfig();
+                    dialogConfig = {
+                        maxWidth: '600px',
+                    }
 
-    //SPOT FUNCTIONS
+                    dialogConfig.data = [];
+                    dialogConfig.data.spotId = response.uid;
+                    let dialogRef = this.dialog.open(
+                        DialogShareComponent,
+                        dialogConfig
+                    );
+                    dialogRef.afterClosed().subscribe(result => {
+                        this.router.navigate(['/'], {
+                            state: {
+                                data: {
+                                    spot_uid: response.uid,
+                                    lat: this.data.lat,
+                                    lng: this.data.lng
+                                }
+                            }
+                        });
+                    });
+                }).catch(() => {
+                    this._snackBar.open("Failed to register", undefined, {
+                        duration: 2000,
+                    });
+                    this.disabled = false;
+                    this.currentAction = ""
+                })
+            } else {
+                this.spotService.updateSpot(this.resourceForm.get('uid')?.value, this.resourceForm.value).then((response) => {
+                    if (this.deletedImagesIndex.length > 0) {
+                        this.deletedImagesIndex.forEach(index => {
+                            this.spotService.updateSpot(this.resourceForm.get('uid')?.value, { pictures: arrayRemove(this.spotPictures[index]) })
+                        });
+                    }
+                    for (let i = 0; i < this.previews.length; i++) {
+                        if (this.previews[i].name !== undefined) {
+                            this.updatePictures(this.previews[i].name, this.previews[i].downloadURL, this.previews[i].orientation, i + 1 == this.previews.length ? true : false, this.previews[i].cover)
+                        }
+                    }
+                    this.spotService.updateSpot(this.resourceForm.get('uid')?.value, { thumbnail: this.thumbnail, pictures: this.previews }).then(() => {
+                        this.disabled = false;
+                        this.sharedService.notify("Spot updated successfully !", 4000);
+                        this.router.navigate(['/'], {
+                            state: {
+                                data: {
+                                    spot_uid: this.resourceForm.get('uid')?.value,
+                                    lat: this.resourceForm.get('lat')?.value,
+                                    lng: this.resourceForm.get('lng')?.value
+                                }
+                            }
+                        });
+                    })
+                }).catch((error) => {
+                    this.disabled = false;
+                    this.sharedService.notify("An error occurred, try again later!", 4000);
+                    console.log(error);
+                });
+                this.currentAction = ""
+            }
+        } else {
+            this.resourceForm.markAllAsTouched();
+            if (this.previews.length == 0) {
+                this._snackBar.open("Need at least 1 picture", undefined, {
+                    duration: 2000,
+                }
+                );
+            }
+        }
+    }
+
+
     getTypes() {
         this.receiveData.getTypes().then((result: QuerySnapshot) => {
             result.forEach((res: QueryDocumentSnapshot) => {
@@ -134,7 +260,6 @@ export abstract class BaseSpotFormComponent implements OnInit {
         }
 
         if (this.selectedFiles && this.selectedFiles[0]) {
-            // this.disabled = true;
             const numberOfFiles = this.selectedFiles.length;
             for (let i = 0; i < numberOfFiles; i++) {
                 let reader = new FileReader();
@@ -146,12 +271,7 @@ export abstract class BaseSpotFormComponent implements OnInit {
                     name = name.toLowerCase();
                     name = name.split('.')[0];
                     let orientation = await this.imageCompress.getOrientation(this.selectedFiles[i]);
-                    if (this.currentAction == "new") this.ngxCompress(e.target.result, name, orientation);
-                    if (this.currentAction == "edit") {
-                        let cover: boolean = false;
-                        if (this.dataPictures.length == 0 && i == 0) cover = true;
-                        this.updatePictures(name, e.target.result, orientation, i + 1 == numberOfFiles ? true : false, cover);
-                    }
+                    this.ngxCompress(e.target.result, name, orientation);
                 };
             }
         }
@@ -163,90 +283,70 @@ export abstract class BaseSpotFormComponent implements OnInit {
         }
     }
 
-
-    remove(index: any) {
-        if (this.currentAction == "edit") {
-            let dialogConfig = new MatDialogConfig();
-            dialogConfig = {
-                maxWidth: '600px',
-            }
-            dialogConfig.data = [];
-            dialogConfig.data.message = "Do you want to remove this picture?";
-            dialogConfig.data.confirm = "Confirm";
-            dialogConfig.data.cancel = "Cancel";
-
-            let dialogRef = this.dialog.open(ConfirmationDialogComponent, dialogConfig);
-            dialogRef.afterClosed().subscribe(result => {
-                if (result) {
-                    this.disabled = true;
-                    this.spotService.deleteImage(this.dataPictures[index].path).then((response) => {
-                        this.spotService.updateSpot(this.resourceForm.get('uid')?.value, { pictures: arrayRemove(this.dataPictures[index]) }).then((responsePic) => {
-                            let imageCover = this.dataPictures[index].cover;
-                            this.dataPictures.splice(index, 1);
-                            if (imageCover === true) {
-                                this.sharedService.notify("Picture deleted successfully, setting new cover !", 4000);
-                                this.setCover(0);
-                            } else {
-                                this.disabled = false;
-                                this.sharedService.notify("Picture deleted successfully !", 4000);
-                            }
-
-                        }).catch((error) => {
-                            this.disabled = false;
-                            this.sharedService.notify("An error occurred, try again later!", 4000);
-                            //console.log(error);
-                        });
-                    }).catch((error) => {
-                        this.disabled = false;
-                        this.sharedService.notify("An error occurred, try again later!", 4000);
-                        //.log(error);
+    ngxCompress(image: string, name: string, orientation: DOC_ORIENTATION) {
+        this.imageCompress
+            .compressFile(image, orientation, 60, 45, 1024, 1024)
+            .then((result: DataUrl) => {
+                if (this.previews.length == 0) {
+                    this.previews.push({
+                        name: name,
+                        downloadURL: result,
+                        orientation: orientation,
+                        cover: true
+                    });
+                    this.ngxCompressThumb(result, name, orientation);
+                } else {
+                    this.previews.push({
+                        name: name,
+                        downloadURL: result,
+                        orientation: orientation,
+                        cover: false
                     });
                 }
             });
-        } else {
-            if (this.previews[index].cover === false) {
-                this.previews.splice(index, 1);
-            } else {
-                this.previews.splice(index, 1);
-                this.setCover(0);
-            }
-        }
+    }
+
+    async ngxCompressThumb(image: string, name: string, orientation: DOC_ORIENTATION) {
+        return this.imageCompress
+            .compressFile(image, orientation, 100, 100, 80, 80)
+            .then((result: DataUrl) => {
+                this.thumbnail = {
+                    name: name,
+                    downloadURL: result,
+                    orientation: orientation,
+                    cover: true
+                }
+            });
     }
 
     setCover(index: any) {
-        if (this.currentAction == "new") {
-            let coverIndex = this.previews.findIndex(preview => preview.cover === true);
-            if (coverIndex >= 0) {
-                this.previews[coverIndex].cover = false;
-            }
-
-            this.ngxCompressThumb(this.previews[index].file, this.previews[index].name, this.previews[index].orientation);
-            this.previews[index].cover = true;
-        } else {
+        if (this.currentAction == "edit") {
             this.disabled = true;
-            const imgUrl = this.dataPictures[index].downloadURL;
+            const imgUrl = this.previews[index].downloadURL;
             // console.log(imgUrl)
             const imgName = "cover";
+            this.previews.forEach( pictures => {
+                if(pictures.cover === true) pictures.cover = false;
+            })
             this.httpClient.get(imgUrl, { responseType: 'blob' as 'json' })
                 .subscribe((res: any) => {
                     const file = new Blob([res], { type: res.type });
-
                     let reader = new FileReader();
                     reader.readAsDataURL(file);
                     reader.onload = (e: any) => {
                         //console.log(this.dataPictures[index])
                         this.imageCompress
-                            .compressFile(e.target.result, this.dataPictures[index].orientation, 100, 100, 80, 80)
+                            .compressFile(e.target.result, this.previews[index].orientation, 100, 100, 80, 80)
                             .then((result: DataUrl) => {
                                 if (this.thumbnail == null) {
-                                    this.updateThumbnail(imgName, result, this.dataPictures[index].orientation, index);
+                                    this.updateThumbnail(imgName, result, this.previews[index].orientation, index);
                                 } else {
                                     //* Remover o thumbmail anterior do banco
                                     this.spotService.deleteImage(this.thumbnail.path).then((response) => {
                                         this.spotService.updateSpot(this.resourceForm.get('uid')?.value, { thumbnail: null }).then((responseThumbnail) => {
                                             this.thumbnail = null;
                                             this.disabled = false;
-                                            this.updateThumbnail(imgName, result, this.dataPictures[index].orientation, index);
+                                            this.updateThumbnail(imgName, result, this.previews[index].orientation, index);
                                         }).catch((error) => {
                                             this.disabled = false;
                                             this.sharedService.notify("An error occurred, try again later!", 2000);
@@ -265,6 +365,13 @@ export abstract class BaseSpotFormComponent implements OnInit {
                     this.disabled = false;
                     this.sharedService.notify("An error occurred, try again later!", 2000);
                 });
+        } else {
+            let coverIndex = this.previews.findIndex(preview => preview.cover === true);
+            if (coverIndex >= 0) {
+                this.previews[coverIndex].cover = false;
+            }
+            this.ngxCompressThumb(this.previews[index].downloadURL, this.previews[index].name, this.previews[index].orientation);
+            this.previews[index].cover = true;
         }
     }
 
@@ -273,181 +380,35 @@ export abstract class BaseSpotFormComponent implements OnInit {
         gallery.classList.toggle("full");
     }
 
-    async save() {
-        if (this.previews.length > 0 || this.dataPictures.length > 0 && this.resourceForm.valid) {
-            if (this.currentAction == "new") {
-                this.disabled = true;
-                if (this.thumbnail == null) {
-                    await this.ngxCompressThumb(this.previews[0].file, this.previews[0].name, this.previews[0].orientation)
-                }
-                let hash = geohashForLocation([this.historyData.lat, this.historyData.lng]);
-                let spot: Spot = {
-                    name: this.resourceForm.controls['name'].value,
-                    address: {
-                        street_number: this.resourceForm.get('street_number')?.value,
-                        route: this.resourceForm.get('route')?.value,
-                        point_of_interest: this.resourceForm.get('point_of_interest')?.value,
-                        postal_code: this.resourceForm.get('postal_code')?.value,
-                        city: this.resourceForm.get('city')?.value,
-                        state: this.resourceForm.get('state')?.value,
-                        country: this.resourceForm.get('country')?.value,
-                    },
-                    types: this.resourceForm.controls['types'].value,
-                    conditions: this.resourceForm.controls['conditions'].value,
-                    lat: this.historyData.lat,
-                    lng: this.historyData.lng,
-                    hash: hash,
-                    user_uid: this.user.uid,
-                    user: this.user.displayName,
-                    status: 'active',
-                    created: new Date(),
-                    modified: new Date()
-                }
-
-                let response = await this.spotService.createSpot(spot, this.previews, this.thumbnail);
-                if (response.status) {
-                    this.sendData.addModeration(response.uid, spot.name, 'created', spot.user_uid, spot.address.country, this.user.displayName);
-                    this.disabled = false;
-                    this._snackBar.open("Spot registered successfully", undefined, {
-                        duration: 2000,
-                    }
-                    );
-
-                    let dialogConfig = new MatDialogConfig();
-                    dialogConfig = {
-                        maxWidth: '600px',
-                    }
-
-                    dialogConfig.data = [];
-                    dialogConfig.data.spotId = response.uid;
-                    let dialogRef = this.dialog.open(
-                        DialogShareComponent,
-                        dialogConfig
-                    );
-                    dialogRef.afterClosed().subscribe(result => {
-                        this.router.navigate(['/'], {
-                            state: {
-                                data: {
-                                    spot_uid: response.uid,
-                                    lat: spot.lat,
-                                    lng: spot.lng
-                                }
-                            }
-                        });
-                    });
-                } else {
-                    this._snackBar.open("Failed to register", undefined, {
-                        duration: 2000,
-                    }
-                    );
-                    this.disabled = false;
-                }
-            } else { 
-                this.disabled = true;
-                this.spotService.updateSpot(this.resourceForm.get('uid')?.value, this.resourceForm.value).then((response) => {
-                    this.sendData.addModeration(this.resourceForm.get('uid')?.value, this.resourceForm.get('name')?.value, 'infos modified', this.user.uid, this.resourceForm.get('address.country')?.value, this.user.displayName);
-                    this.disabled = false;
-                    this.sharedService.notify("Spot updated successfully !", 4000);
-                    //this.clickEventSubscription.unsubscribe();
-                    this.router.navigate(['/'], {
-                        state: {
-                            data: {
-                                spot_uid: this.resourceForm.get('uid')?.value,
-                                lat: this.resourceForm.get('lat')?.value,
-                                lng: this.resourceForm.get('lng')?.value
-                            }
-                        }
-                    });
-                }).catch((error) => {
-                    this.disabled = false;
-                    this.sharedService.notify("An error occurred, try again later!", 4000);
-                    console.log(error);
-                });
-            }
-        } else {
-            this.resourceForm.markAllAsTouched();
-            if (this.previews.length == 0) {
-                this._snackBar.open("Need at least 1 picture", undefined, {
-                    duration: 2000,
-                }
-                );
-            }
+    remove(index: any) {
+        let dialogConfig = new MatDialogConfig();
+        dialogConfig = {
+            maxWidth: '600px',
         }
-    }
-    //SPOT FUNCTIONS
+        dialogConfig.data = [];
+        dialogConfig.data.message = "Do you want to remove this picture?";
+        dialogConfig.data.confirm = "Confirm";
+        dialogConfig.data.cancel = "Cancel";
 
-
-
-
-    //SPOT FUNCTIONS AUXILIAR
-
-    ngxCompress(image: string, name: string, orientation: DOC_ORIENTATION) {
-        this.imageCompress
-            .compressFile(image, orientation, 60, 45, 1024, 1024)
-            .then((result: DataUrl) => {
-                if (this.previews.length == 0) {
-                    this.previews.push({
-                        name: name,
-                        file: result,
-                        orientation: orientation,
-                        cover: true
-                    });
-                    this.ngxCompressThumb(result, name, orientation);
+        let dialogRef = this.dialog.open(ConfirmationDialogComponent, dialogConfig);
+        dialogRef.afterClosed().subscribe(result => {
+            if (result) {
+                if (this.previews[index].cover === false) {
+                    if (this.previews[index].downloadURL.indexOf('firebase') !== -1) {
+                        this.deletedImagesIndex.push(index)
+                    }
+                    this.previews.splice(index, 1);
                 } else {
-                    this.previews.push({
-                        name: name,
-                        file: result,
-                        orientation: orientation,
-                        cover: false
-                    });
+                    if (this.previews[index].downloadURL.indexOf('firebase') !== -1) {
+                        this.deletedImagesIndex.push(index)
+                    }
+                    this.previews.splice(index, 1);
+                    this.setCover(0);
                 }
-            });
+            }
+        })
+
     }
-
-    async ngxCompressThumb(image: string, name: string, orientation: DOC_ORIENTATION) {
-        return this.imageCompress
-            .compressFile(image, orientation, 100, 100, 80, 80)
-            .then((result: DataUrl) => {
-                this.thumbnail = {
-                    name: name,
-                    file: result,
-                    orientation: orientation,
-                    cover: true
-                }
-            });
-    }
-
-    //SPOT FUNCTIONS AUXILIAR
-
-
-    //SPOT EDIT FUNCTIONS AUXILIAR
-    updateThumbnail(name: string, file: any, orientation: DOC_ORIENTATION, cover_index: number) {
-        this.disabled = true;
-        let path = "spots/" + this.resourceForm.get('uid')?.value + "/" + name + "_thumbnail.png";
-        this.spotService.uploadImageAsPromise(file, path, orientation, true).then((response) => {
-            this.thumbnail = response;
-            this.dataPictures.forEach(pictures => {
-                if (pictures.cover === true) pictures.cover = false;
-            });
-            this.dataPictures[cover_index].cover = true;
-            this.spotService.updateSpot(this.resourceForm.get('uid')?.value, { thumbnail: response, pictures: this.dataPictures }).then(() => {
-                // , status: 'image modified'
-                //this.spotService.addModeration(this.resourceForm.get('uid')?.value, this.data.name,'image modified');
-                this.disabled = false;
-                this.sharedService.notify("Thumbnail updated successfully !", 4000);
-
-            }).catch((error) => {
-                this.disabled = false;
-                this.sharedService.notify("An error occurred, try again later!", 4000);
-                //console.log(error);
-            });
-        }).catch((error) => {
-            this.disabled = false;
-            this.sharedService.notify("An error occurred, try again later!", 4000);
-            //console.log(error);
-        });
-    }
-
     updatePictures(name: string, file: any, orientation: DOC_ORIENTATION, last: boolean, cover: boolean) {
         this.imageCompress
             .compressFile(file, orientation, 60, 45, 1024, 1024)
@@ -457,12 +418,11 @@ export abstract class BaseSpotFormComponent implements OnInit {
                 this.spotService.uploadImageAsPromise(result, path, orientation, cover).then((response) => {
                     this.spotService.updateSpot(this.resourceForm.get('uid')?.value, { pictures: arrayUnion(response) }).then((responsePic) => {
                         if (last == true) {
-                            this.sendData.addModeration(this.resourceForm.get('uid')?.value, this.data.name, 'image modified', this.user.uid, this.resourceForm.get('address.country')?.value, this.user.displayName);
+                            // this.sendData.addModeration(this.resourceForm.get('uid')?.value, this.resourceForm.get('name')?.value, 'image modified', this.user.uid, this.resourceForm.get('address.country')?.value, this.user.displayName);
                             this.disabled = false;
-                            this.sharedService.notify("Pictures updated successfully !", 4000);
                         }
-                        this.dataPictures.push(response);
-                        if (cover) this.setCover(0);
+                        this.previews.push(response);
+                        // if (cover) this.setCover(0);
 
                     }).catch((error) => {
                         this.disabled = false;
@@ -477,6 +437,26 @@ export abstract class BaseSpotFormComponent implements OnInit {
             });
     }
 
-
-    //SPOT EDIT FUNCTIONS AUXILIAR
+    updateThumbnail(name: string, file: any, orientation: DOC_ORIENTATION, cover_index: number) {
+        this.disabled = true;
+        let path = "spots/" + this.resourceForm.get('uid')?.value + "/" + name + "_thumbnail.png";
+        this.spotService.uploadImageAsPromise(file, path, orientation, true).then((response) => {
+            this.thumbnail = response;
+            this.previews.forEach(pictures => {
+                if (pictures.cover === true) pictures.cover = false;
+            });
+            this.previews[cover_index].cover = true;
+            this.spotService.deleteImage(this.thumbnail.path).then(() => {
+                this.disabled = false;
+                console.log(this.previews)
+            }).catch((error) => {
+                this.sharedService.notify("An error occurred, try again later!", 4000);
+                console.log(error)
+            })
+        }).catch((error) => {
+            this.disabled = false;
+            this.sharedService.notify("An error occurred, try again later!", 4000);
+            //console.log(error);
+        });
+    }
 }

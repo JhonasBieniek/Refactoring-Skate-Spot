@@ -26,13 +26,14 @@
 //     height: 80px;
 //     width: 70px;
 
-//     .content {
-//         position: relative;
-//     }
+    // .content {
+    //     position: relative;
+    // }
 // }
 
 //* CSS for image Gallery
-.spotRegister{
+
+.spotEdit{
     max-width: 800px;
     margin: 1rem auto;
 }
@@ -57,13 +58,6 @@
     transition: all 0.5s ease;
     cursor: pointer;
 }
-.gallery .gallery-item:hover {
-    transform: scale(1.015);
-}
-
-.gallery .content {
-    padding: 0px;
-}
 
 .gallery-item{
     position: relative;
@@ -71,6 +65,14 @@
 
 .full .gallery-item{
     position: unset;
+}
+
+.gallery .gallery-item:hover {
+    transform: scale(1.015);
+}
+
+.gallery .content {
+    padding: 0px;
 }
 
 .gallery img {
@@ -98,9 +100,6 @@
 }
 .close:hover {
     transform: scale(0.9);
-}
-.full .content .close {
-    display: none;
 }
 
 .full .close {

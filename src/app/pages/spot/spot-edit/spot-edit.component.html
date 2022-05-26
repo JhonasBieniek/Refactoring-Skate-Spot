@@ -92,7 +92,7 @@
                         <div fxLayout="row wrap">
                             <div fxFlex="100" style="padding-left: 5px;">
                                 Pictures:
-                                <button mat-icon-button color="primary" type="button" aria-label="upload button" (click)="fileInput.click()" [disabled]="dataPictures.length >= maxImgs">
+                                <button mat-icon-button color="primary" type="button" aria-label="upload button" (click)="fileInput.click()" [disabled]="previews.length >= maxImgs">
                                     <mat-icon>attach_file</mat-icon>
                                 </button>
                                 <input hidden #fileInput id="fileInput" type="file" accept=".jpg,.png,.jpeg" multiple (change)="selectFiles($event)">
@@ -105,7 +105,7 @@
                                         <button mat-menu-item (click)="remove(row)">Remove</button>
                                     </ng-template>
                                 </mat-menu>
-                                <div *ngFor="let src of dataPictures; let i = index" class="gallery-item" id="gallery-item-{{i}}" >
+                                <div *ngFor="let src of previews; let i = index" class="gallery-item" id="gallery-item-{{i}}" >
                                     <button mat-mini-fab type="button" class="close" [matMenuTriggerFor]="aboveMenu" [matMenuTriggerData]="{row: i}">
                                         <mat-icon>more_vert</mat-icon>
                                     </button>
@@ -118,7 +118,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div *ngIf="dataPictures.length < maxImgs" class="gallery-item" (click)="fileInput.click()"> <!--(click)="imageResize(i)"-->
+                                <div *ngIf="maxImgs - previews.length > 0" class="gallery-item" (click)="fileInput.click()"> <!--(click)="imageResize(i)"-->
                                     <div class="content">
                                         <div class="image-container">
                                             <img [src]="'./assets/images/placeholder.png'" style="object-fit: fill;">

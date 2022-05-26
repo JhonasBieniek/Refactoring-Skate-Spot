@@ -55,7 +55,6 @@ export class SpotService {
 
   async uploadImageAsPromise(imageFile:string, path:string, orientation: DOC_ORIENTATION, cover: boolean) {
     let storageref = ref(this.storage, path);
-
     return await uploadString(storageref, imageFile, 'data_url').then(async function (task) {
       return getDownloadURL(storageref);
     }).then(function (downloadURL) {
@@ -82,7 +81,6 @@ export class SpotService {
   }
   
   async createSpot(data:Spot, files: any[], thumbnail: any) {
-
     const newSpot = doc(this.spots);
     data.uid = newSpot.id;
     
@@ -100,7 +98,7 @@ export class SpotService {
 
           for (let index = 0; index < files.length; index++) {
             let path = "spots/"+  data.uid +"/"+ files[index].name + "_"+ Date.now()+".png";
-            promises.push(this.uploadImageAsPromise(files[index].file, path, files[index].orientation, files[index].cover));
+            promises.push(this.uploadImageAsPromise(files[index].downloadURL, path, files[index].orientation, files[index].cover));
           }
           
           let result = await Promise.all(promises).then(function(values) {
@@ -118,7 +116,7 @@ export class SpotService {
 
           if(result.status == true){
 
-            data.thumbnail = await this.uploadImageAsPromise(thumbnail.file, "spots/"+ data.uid +"/"+thumbnail.name + "_thumbnail.png", thumbnail.orientation, thumbnail.cover);
+            data.thumbnail = await this.uploadImageAsPromise(thumbnail.downloadURL, "spots/"+ data.uid +"/"+thumbnail.name + "_thumbnail.png", thumbnail.orientation, thumbnail.cover);
 
             data.pictures = result.data;
             let docref = await doc(this.db, "/spots/"+data.uid);

@@ -1,8 +1,8 @@
-import { arrayUnion } from 'firebase/firestore';
+import { arrayUnion, arrayRemove } from 'firebase/firestore';
 import { sendData } from './../shared/services/sendData.service';
 import { receiveData } from './../shared/services/receiveData.service';
 import { NavbarService } from '../../../shared/services/navbar.service';
-import { Component, Injector, OnInit } from '@angular/core';
+import { Component, Injector, OnInit, Injectable } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -22,8 +22,8 @@ import { BaseSpotFormComponent } from 'src/app/shared/components/base-spot-form/
   styleUrls: ['./spot-edit.component.scss'],
   //encapsulation: ViewEncapsulation.None
 })
-export class SpotEditComponent extends BaseSpotFormComponent implements OnInit {
 
+export class SpotEditComponent extends BaseSpotFormComponent implements OnInit {
 
   clickEventSubscription!: Subscription;
 
@@ -53,48 +53,25 @@ export class SpotEditComponent extends BaseSpotFormComponent implements OnInit {
     super.ngOnInit()
   }
 
-    protected buildResourceForm() {
-      this.resourceForm = this.formBuilder.group({
-        uid: [null, Validators.required],
-        user_uid: [null, Validators.required],
-        name: [null,Validators.required],
-        address: new FormGroup({
-          city: new FormControl(null, Validators.required),
-          state: new FormControl(null, Validators.required),
-          country: new FormControl(null, Validators.required),
-          point_of_interest: new FormControl(null),
-          postal_code: new FormControl(null),
-          route: new FormControl(null, Validators.required),
-          street_number: new FormControl(null),
-        }),
-        types: [null, Validators.required],
-        conditions: [null, Validators.required],
-        lat: [null, Validators.required],
-        lng: [null, Validators.required],
-        hash: [null, Validators.required]
-      });
-      if(this.user.uid != null && this.user.uid != undefined && this.user.uid != ''){
-        this.disabled = true;
-        this.spotService.getSpotView(this.route.snapshot.params['id']).then((docSnap) => {
-          if (docSnap.exists()) {
-            this.data = docSnap.data();
-            this.resourceForm.patchValue(this.data);
-            this.dataPictures = [...this.data.pictures];
-            this.thumbnail = this.data.thumbnail;
-            this.getTypes();
-            this.getConditions();
-            this.clickEventSubscription = this.sharedService.getClickEvent().subscribe( ()=> {
-              this.save();
-            });
-            setTimeout(()=>{ this.disabled = false; this.start = true}, 1000);
-          } else {
-            this.sharedService.notify("Spot not Found !", 4000);
-            this.router.navigate(['/'])
-          }
-        });
-      }else{
+  protected getData(): any{
+    this.spotService.getSpotView(this.route.snapshot.params['id']).then((docSnap) => {
+      if (docSnap.exists()) {
+        this.currentAction = "edit";
+        this.data = docSnap.data();
+        this.spotPictures = [...this.data.pictures]
+        this.previews = [...this.data.pictures]
+        this.thumbnail = this.data.thumbnail;
+        this.buildResourceForm(this.data)
+      } else {
+        this.sharedService.notify("Spot not Found !", 4000);
         this.router.navigate(['/'])
       }
+    });
   }
+
+  protected spotUpdate(): any{
+    
+  }
+
 
 }
