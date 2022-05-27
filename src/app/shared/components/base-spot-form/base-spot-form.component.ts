@@ -70,55 +70,69 @@ export abstract class BaseSpotFormComponent implements OnInit {
     }
 
     ngOnInit(): void {
-        this.getData();
+        this.buildResourceForm();
     }
 
     ngOnDestroy(): void {
         if (this.clickEventSubscription) this.clickEventSubscription.unsubscribe();
+        if(this.currentAction == "new"){
+            localStorage.setItem('spotValue', JSON.stringify(this.resourceForm.value));
+            console.log(this.resourceForm.value)
+            localStorage.setItem('spotImages', JSON.stringify(this.previews));
+            localStorage.setItem('spotCreating', 'true');
+        }
     }
 
-    protected abstract getData(): any
+    protected abstract getData(): Promise<any>
 
-    protected buildResourceForm(data: any) {
+    protected buildResourceForm() {
         this.disabled = true;
-        this.data = data
-        this.resourceForm = this.formBuilder.group({
-            uid: [this.data.uid !== null || this.data.uid !== undefined ? this.data.uid : null],
-            user: [this.user.displayName, Validators.required],
-            user_uid: [this.user.uid !== null || this.user.uid !== undefined ? this.user.uid : null],
-            name: [this.data.name !== null || this.data.name !== undefined ? this.data.name : null],
-            address: new FormGroup({
-                city: new FormControl(null, Validators.required),
-                state: new FormControl(null, Validators.required),
-                country: new FormControl(null, Validators.required),
-                point_of_interest: new FormControl(null),
-                postal_code: new FormControl(null),
-                route: new FormControl(null, Validators.required),
-                street_number: new FormControl(null),
-            }),
-            types: [null, Validators.required],
-            conditions: [null, Validators.required],
-            lat: [null, Validators.required],
-            lng: [null, Validators.required],
-            hash: [this.data.hash !== null || this.data.hash !== undefined ? this.data.hash : null],
-            status: [null],
-            created: [null],
-            modified: [null]
-        });
-        this.resourceForm.patchValue(this.data)
-        if (this.currentAction == "new") {
-            if (this.data.address.point_of_interest != '') {
-                this.resourceForm.get('name')?.setValue('Spot ' + this.data.address.point_of_interest);
-            } else if (this.data.address.route != '') {
-                this.resourceForm.get('name')?.setValue('Spot ' + this.data.address.route);
-            }
+        if(localStorage.getItem('spotCreating') === 'true'){
+            let spotData = JSON.parse(localStorage.getItem('spotValue') || '{}');
+            this.data = spotData;
+            this.previews = JSON.parse(localStorage.getItem('spotImages') || '{}');
+        } else {
+            this.getData().then((data) => {
+                this.data = data
+                this.resourceForm = this.formBuilder.group({
+                    uid: [this.data.uid !== null || this.data.uid !== undefined ? this.data.uid : null],
+                    user: [this.user.displayName, Validators.required],
+                    user_uid: [this.user.uid !== null || this.user.uid !== undefined ? this.user.uid : null],
+                    name: [this.data.name !== null || this.data.name !== undefined ? this.data.name : null],
+                    address: new FormGroup({
+                        city: new FormControl(null, Validators.required),
+                        state: new FormControl(null, Validators.required),
+                        country: new FormControl(null, Validators.required),
+                        point_of_interest: new FormControl(null),
+                        postal_code: new FormControl(null),
+                        route: new FormControl(null, Validators.required),
+                        street_number: new FormControl(null),
+                    }),
+                    types: [null, Validators.required],
+                    conditions: [null, Validators.required],
+                    lat: [null, Validators.required],
+                    lng: [null, Validators.required],
+                    hash: [this.data.hash !== null || this.data.hash !== undefined ? this.data.hash : null],
+                    status: [null],
+                    created: [null],
+                    modified: [null]
+                })
+                this.resourceForm.patchValue(this.data)
+                if (this.currentAction == "new") {
+                    if (this.data.address.point_of_interest != '') {
+                        this.resourceForm.get('name')?.setValue('Spot ' + this.data.address.point_of_interest);
+                    } else if (this.data.address.route != '') {
+                        this.resourceForm.get('name')?.setValue('Spot ' + this.data.address.route);
+                    }
+                }
+                this.getTypes();
+                this.getConditions();
+                this.clickEventSubscription = this.sharedService.getClickEvent().subscribe(() => {
+                    this.save();
+                });
+                setTimeout(() => { this.disabled = false; this.start = true }, 500);
+            })
         }
-        this.getTypes();
-        this.getConditions();
-        this.clickEventSubscription = this.sharedService.getClickEvent().subscribe(() => {
-            this.save();
-        });
-        setTimeout(() => { this.disabled = false; this.start = true }, 500);
     }
 
     setAction(index: any): any {
@@ -174,9 +188,13 @@ export abstract class BaseSpotFormComponent implements OnInit {
                     });
             }).catch((error) => {
                 console.log(error)
+                this.disabled = false;
+                this.sharedService.notify("An error occurred, try again later!", 2000);
             })
         }).catch((error) => {
             console.log(error)
+            this.disabled = false;
+            this.sharedService.notify("An error occurred, try again later!", 2000);
         })
     }
 

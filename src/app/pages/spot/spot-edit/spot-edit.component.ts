@@ -1,3 +1,4 @@
+import { resolve } from 'dns';
 import { sendData } from './../shared/services/sendData.service';
 import { receiveData } from './../shared/services/receiveData.service';
 import { NavbarService } from '../../../shared/services/navbar.service';
@@ -6,7 +7,7 @@ import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms'
 import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from 'src/app/shared/services/auth.service';
-import { SpotService } from 'src/app/pages/spot/shared/services/spot.service'; 
+import { SpotService } from 'src/app/pages/spot/shared/services/spot.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { HttpClient } from '@angular/common/http';
 import { SharedService } from 'src/app/shared/services/shared.service';
@@ -38,36 +39,35 @@ export class SpotEditComponent extends BaseSpotFormComponent implements OnInit {
     protected dialog: MatDialog,
     protected httpClient: HttpClient,
     protected sharedService: SharedService,
-    protected imageCompress: NgxImageCompressService, 
+    protected imageCompress: NgxImageCompressService,
     protected spotService: SpotService,
-    protected breakpointObserver: BreakpointObserver, 
+    protected breakpointObserver: BreakpointObserver,
     protected navbarService: NavbarService
-    ) {
-      super(injector, route, router, fb, authService, sendData, receiveData, _snackBar, dialog, httpClient,
-        sharedService, imageCompress, spotService, breakpointObserver, navbarService)
-      this.user = authService.getUser();
+  ) {
+    super(injector, route, router, fb, authService, sendData, receiveData, _snackBar, dialog, httpClient,
+      sharedService, imageCompress, spotService, breakpointObserver, navbarService)
+    this.user = authService.getUser();
   }
-  
+
   ngOnInit(): void {
     super.ngOnInit()
   }
 
-  protected getData(){
-    this.spotService.getSpotView(this.route.snapshot.params['id']).then((docSnap) => {
-      if (docSnap.exists()) {
-        this.currentAction = "edit";
-        this.data = docSnap.data();
-        this.spotPictures = [...this.data.pictures]
-        this.previews = [...this.data.pictures]
-        this.thumbnail = this.data.thumbnail;
-        this.buildResourceForm(this.data)
-      } else {
-        this.sharedService.notify("Spot not Found !", 4000);
-        this.router.navigate(['/'])
-      }
-    });
+  protected async getData(): Promise<any> {
+    this.currentAction = "edit";
+    return await new Promise<any>((resolve, reject) => {
+      this.spotService.getSpotView(this.route.snapshot.params['id']).then((docSnap) => {
+        if (docSnap.exists()) {
+          this.data = docSnap.data()
+          this.previews = [...this.data.pictures];
+          this.spotPictures = [...this.data.pictures];
+          this.thumbnail = this.data.thumbnail;
+          resolve(docSnap.data())
+        } else {
+          this.sharedService.notify("Spot not Found !", 4000);
+          this.router.navigate(['/'])
+        }
+      })
+    })
   }
-
-  //GUARDAR AS INTENÇÕES DO USUARIO E OS VALORES DAS INTENÇÕES E NO SAVE APENAS EXECUTAR, PARA QUE NÃO HAJA CONFLITO DE EXECUÇÃO.
-
 }

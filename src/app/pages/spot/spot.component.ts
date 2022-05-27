@@ -9,7 +9,7 @@ import { Component, OnInit, ViewEncapsulation, Injector } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { AuthService } from 'src/app/shared/services/auth.service';
-import { SpotService } from 'src/app/pages/spot/shared/services/spot.service'; 
+import { SpotService } from 'src/app/pages/spot/shared/services/spot.service';
 import { geohashForLocation } from 'geofire-common';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
@@ -19,6 +19,7 @@ import { Subscription } from 'rxjs';
 import { SharedService } from 'src/app/shared/services/shared.service';
 import { DataUrl, DOC_ORIENTATION, NgxImageCompressService, UploadResponse } from 'ngx-image-compress';
 import { runInThisContext } from 'vm';
+import { resolve } from 'dns';
 
 export interface imagePreview {
   name: string;
@@ -48,34 +49,31 @@ export class SpotComponent extends BaseSpotFormComponent implements OnInit {
     protected dialog: MatDialog,
     protected httpClient: HttpClient,
     protected sharedService: SharedService,
-    protected imageCompress: NgxImageCompressService, 
+    protected imageCompress: NgxImageCompressService,
     protected spotService: SpotService,
-    protected breakpointObserver: BreakpointObserver, 
+    protected breakpointObserver: BreakpointObserver,
     protected navbarService: NavbarService
-    ) {
-      super(injector, route, router, fb, authService, sendData, receiveData, _snackBar, dialog, httpClient,
-        sharedService, imageCompress, spotService, breakpointObserver, navbarService)
+  ) {
+    super(injector, route, router, fb, authService, sendData, receiveData, _snackBar, dialog, httpClient,
+      sharedService, imageCompress, spotService, breakpointObserver, navbarService)
   }
 
   ngOnDestroy() {
-    localStorage.setItem('spotGeolocation', JSON.stringify(this.spotGeolocation));
-    localStorage.setItem('spotValue', JSON.stringify(this.resourceForm.value));
-    localStorage.setItem('spotImages', JSON.stringify(this.previews));
-    localStorage.setItem('spotCreating', 'true');
+    
   }
-  
+
   ngOnInit(): void {
-    if(history.state.data === undefined){
-      this.router.navigate(['/']);
-    }
     super.ngOnInit()
   }
 
-  protected getData(): any{
+  protected async getData(): Promise<any> {
     this.currentAction = "new";
-    if(history.state.data !== undefined){
-      this.buildResourceForm(history.state.data) 
-    }
+    return await new Promise<any>((resolve, reject) => {
+      if (history.state.data !== undefined) {
+        resolve(history.state.data);
+      } else {
+        this.router.navigate(['/']);
+      }
+    })
   }
-
 }
