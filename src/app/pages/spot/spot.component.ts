@@ -65,6 +65,9 @@ export class SpotComponent extends BaseSpotFormComponent implements OnInit {
   }
   
   ngOnInit(): void {
+    if(history.state.data === undefined){
+      this.router.navigate(['/']);
+    }
     super.ngOnInit()
   }
 
@@ -72,8 +75,6 @@ export class SpotComponent extends BaseSpotFormComponent implements OnInit {
     this.currentAction = "new";
     if(history.state.data !== undefined){
       this.buildResourceForm(history.state.data) 
-    } else {
-      this.router.navigate(['/'])
     }
   }
 

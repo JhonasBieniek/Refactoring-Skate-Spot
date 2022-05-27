@@ -1,8 +1,9 @@
+import { Types } from './../../../pages/spot/shared/models/type.model';
 import { ConfirmationDialogComponent } from './../confirmation-dialog/confirmation-dialog.component';
 import { Subscription } from 'rxjs';
 import { Spot } from './../../../pages/spot/shared/models/spot.model';
 import { geohashForLocation } from 'geofire-common';
-import { QueryDocumentSnapshot, QuerySnapshot, arrayUnion, arrayRemove } from 'firebase/firestore';
+import { QueryDocumentSnapshot, QuerySnapshot, arrayUnion, arrayRemove, DocumentData } from 'firebase/firestore';
 import { receiveData } from './../../../pages/spot/shared/services/receiveData.service';
 import { sendData } from './../../../pages/spot/shared/services/sendData.service';
 import { DialogShareComponent } from './../../../pages/spot/dialog-share/dialog-share.component';
@@ -30,9 +31,7 @@ export abstract class BaseSpotFormComponent implements OnInit {
     resourceForm!: FormGroup;
     data: any;
     disabled: boolean = false;
-
     start: boolean = false;
-    historyData: any;
     selectedFiles: any[] = [];
     previews: any[] = [];
     thumbnail: any;
@@ -41,10 +40,8 @@ export abstract class BaseSpotFormComponent implements OnInit {
     dataConditions: any[] = [];
     user: any;
     deletedImagesIndex: any[] = [];
-
     spotPictures: any[] = [];
-
-    spotGeolocation: any;
+    spotGeolocation!: Object;
     insertedFiles: number = 0;
     watchID!: number;
     clickEventSubscription!: Subscription;
@@ -122,7 +119,78 @@ export abstract class BaseSpotFormComponent implements OnInit {
             this.save();
         });
         setTimeout(() => { this.disabled = false; this.start = true }, 500);
-        console.log(this.spotPictures)
+    }
+
+    setAction(index: any): any {
+        this.disabled = true;
+        this.spotService.deleteImage(this.thumbnail.path).then((response) => {
+            this.spotService.updateSpot(this.resourceForm.get('uid')?.value, { thumbnail: null }).then(() => {
+                const imgUrl = this.previews[index].downloadURL;
+                const imgName = "cover";
+                this.httpClient.get(imgUrl, { responseType: 'blob' as 'json' })
+                    .subscribe((res: any) => {
+                        const file = new Blob([res], { type: res.type });
+                        let reader = new FileReader();
+                        reader.readAsDataURL(file);
+                        reader.onload = (e: any) => {
+                            this.imageCompress
+                                .compressFile(e.target.result, this.previews[index].orientation, 100, 100, 80, 80)
+                                .then((result: DataUrl) => {
+                                    if (this.thumbnail == null) {
+                                        this.updateThumbnail(imgName, result, this.previews[index].orientation, index);
+                                        this.disabled = false;
+                                        this.sharedService.notify("Spot updated successfully !", 4000);
+                                        this.router.navigate(['/'], {
+                                            state: {
+                                                data: {
+                                                    spot_uid: this.resourceForm.get('uid')?.value,
+                                                    lat: this.resourceForm.get('lat')?.value,
+                                                    lng: this.resourceForm.get('lng')?.value
+                                                }
+                                            }
+                                        })
+                                    } else {
+                                        this.thumbnail = null;
+                                        this.updateThumbnail(imgName, result, this.previews[index].orientation, index);
+                                        this.disabled = false;
+                                        this.disabled = false;
+                                        this.sharedService.notify("Spot updated successfully !", 4000);
+                                        this.router.navigate(['/'], {
+                                            state: {
+                                                data: {
+                                                    spot_uid: this.resourceForm.get('uid')?.value,
+                                                    lat: this.resourceForm.get('lat')?.value,
+                                                    lng: this.resourceForm.get('lng')?.value
+                                                }
+                                            }
+                                        })
+                                    };
+                                });
+                        };
+                    }, err => {
+                        //console.log(err);
+                        this.disabled = false;
+                        this.sharedService.notify("An error occurred, try again later!", 2000);
+                    });
+            }).catch((error) => {
+                console.log(error)
+            })
+        }).catch((error) => {
+            console.log(error)
+        })
+    }
+
+    setCover(index: any) {
+        let coverIndex = this.previews.findIndex(preview => preview.cover === true);
+        if (coverIndex >= 0) {
+            this.previews[coverIndex].cover = false;
+        }
+        if (this.currentAction == "new") this.ngxCompressThumb(this.previews[index].downloadURL, this.previews[index].name, this.previews[index].orientation);
+        this.previews[index].cover = true;
+        if (this.currentAction == "edit") {
+            localStorage.setItem('setCoverIndex', JSON.stringify(index))
+            localStorage.setItem('changeThumb', 'true')
+        }
     }
 
     async save() {
@@ -167,33 +235,38 @@ export abstract class BaseSpotFormComponent implements OnInit {
                     this._snackBar.open("Failed to register", undefined, {
                         duration: 2000,
                     });
-                    this.disabled = false;
-                    this.currentAction = ""
                 })
+                this.disabled = false;
+                this.currentAction = ""
             } else {
                 this.spotService.updateSpot(this.resourceForm.get('uid')?.value, this.resourceForm.value).then((response) => {
+                    this.sendData.addModeration(this.resourceForm.get('uid')?.value, this.resourceForm.get('name')?.value, 'infos modified', this.user.uid, this.resourceForm.get('address.country')?.value, this.user.displayName);
                     if (this.deletedImagesIndex.length > 0) {
                         this.deletedImagesIndex.forEach(index => {
                             this.spotService.updateSpot(this.resourceForm.get('uid')?.value, { pictures: arrayRemove(this.spotPictures[index]) })
                         });
                     }
-                    for (let i = 0; i < this.previews.length; i++) {
-                        if (this.previews[i].name !== undefined) {
-                            this.updatePictures(this.previews[i].name, this.previews[i].downloadURL, this.previews[i].orientation, i + 1 == this.previews.length ? true : false, this.previews[i].cover)
-                        }
-                    }
-                    this.spotService.updateSpot(this.resourceForm.get('uid')?.value, { thumbnail: this.thumbnail, pictures: this.previews }).then(() => {
-                        this.disabled = false;
-                        this.sharedService.notify("Spot updated successfully !", 4000);
-                        this.router.navigate(['/'], {
-                            state: {
-                                data: {
-                                    spot_uid: this.resourceForm.get('uid')?.value,
-                                    lat: this.resourceForm.get('lat')?.value,
-                                    lng: this.resourceForm.get('lng')?.value
+                    this.spotService.updateSpot(this.resourceForm.get('uid')?.value, { pictures: this.previews }).then(() => {
+                        // this.sendData.addModeration(this.resourceForm.get('uid')?.value, this.resourceForm.get('name')?.value, 'image modified', this.user.uid, this.resourceForm.get('address.country')?.value, this.user.displayName);
+                        let coverIndex = JSON.parse(localStorage.getItem('setCoverIndex') || '{}')
+                        let changeThumb = localStorage.getItem('changeThumb');
+                        localStorage.removeItem('setCoverIndex')
+                        localStorage.removeItem('changeThumb')
+                        if (changeThumb !== null) {
+                            this.setAction(coverIndex)
+                        } else {
+                            this.disabled = false;
+                            this.sharedService.notify("Spot updated successfully !", 4000);
+                            this.router.navigate(['/'], {
+                                state: {
+                                    data: {
+                                        spot_uid: this.resourceForm.get('uid')?.value,
+                                        lat: this.resourceForm.get('lat')?.value,
+                                        lng: this.resourceForm.get('lng')?.value
+                                    }
                                 }
-                            }
-                        });
+                            })
+                        }
                     })
                 }).catch((error) => {
                     this.disabled = false;
@@ -319,61 +392,7 @@ export abstract class BaseSpotFormComponent implements OnInit {
             });
     }
 
-    setCover(index: any) {
-        if (this.currentAction == "edit") {
-            this.disabled = true;
-            const imgUrl = this.previews[index].downloadURL;
-            // console.log(imgUrl)
-            const imgName = "cover";
-            this.previews.forEach( pictures => {
-                if(pictures.cover === true) pictures.cover = false;
-            })
-            this.httpClient.get(imgUrl, { responseType: 'blob' as 'json' })
-                .subscribe((res: any) => {
-                    const file = new Blob([res], { type: res.type });
-                    let reader = new FileReader();
-                    reader.readAsDataURL(file);
-                    reader.onload = (e: any) => {
-                        //console.log(this.dataPictures[index])
-                        this.imageCompress
-                            .compressFile(e.target.result, this.previews[index].orientation, 100, 100, 80, 80)
-                            .then((result: DataUrl) => {
-                                if (this.thumbnail == null) {
-                                    this.updateThumbnail(imgName, result, this.previews[index].orientation, index);
-                                } else {
-                                    //* Remover o thumbmail anterior do banco
-                                    this.spotService.deleteImage(this.thumbnail.path).then((response) => {
-                                        this.spotService.updateSpot(this.resourceForm.get('uid')?.value, { thumbnail: null }).then((responseThumbnail) => {
-                                            this.thumbnail = null;
-                                            this.disabled = false;
-                                            this.updateThumbnail(imgName, result, this.previews[index].orientation, index);
-                                        }).catch((error) => {
-                                            this.disabled = false;
-                                            this.sharedService.notify("An error occurred, try again later!", 2000);
-                                            //console.log(error);
-                                        });
-                                    }).catch((error) => {
-                                        this.disabled = false;
-                                        this.sharedService.notify("An error occurred, try again later!", 2000);
-                                        //console.log(error);
-                                    });
-                                };
-                            });
-                    };
-                }, err => {
-                    //console.log(err);
-                    this.disabled = false;
-                    this.sharedService.notify("An error occurred, try again later!", 2000);
-                });
-        } else {
-            let coverIndex = this.previews.findIndex(preview => preview.cover === true);
-            if (coverIndex >= 0) {
-                this.previews[coverIndex].cover = false;
-            }
-            this.ngxCompressThumb(this.previews[index].downloadURL, this.previews[index].name, this.previews[index].orientation);
-            this.previews[index].cover = true;
-        }
-    }
+
 
     imageResize(index: number) {
         let gallery = (<HTMLDivElement>document.getElementById("gallery-item-" + index));
@@ -407,13 +426,11 @@ export abstract class BaseSpotFormComponent implements OnInit {
                 }
             }
         })
-
     }
     updatePictures(name: string, file: any, orientation: DOC_ORIENTATION, last: boolean, cover: boolean) {
         this.imageCompress
             .compressFile(file, orientation, 60, 45, 1024, 1024)
             .then((result: DataUrl) => {
-
                 let path = "spots/" + this.resourceForm.get('uid')?.value + "/" + name + "_" + Date.now() + ".png";
                 this.spotService.uploadImageAsPromise(result, path, orientation, cover).then((response) => {
                     this.spotService.updateSpot(this.resourceForm.get('uid')?.value, { pictures: arrayUnion(response) }).then((responsePic) => {
@@ -422,8 +439,6 @@ export abstract class BaseSpotFormComponent implements OnInit {
                             this.disabled = false;
                         }
                         this.previews.push(response);
-                        // if (cover) this.setCover(0);
-
                     }).catch((error) => {
                         this.disabled = false;
                         this.sharedService.notify("An error occurred, try again lateeer!", 4000);
@@ -446,17 +461,15 @@ export abstract class BaseSpotFormComponent implements OnInit {
                 if (pictures.cover === true) pictures.cover = false;
             });
             this.previews[cover_index].cover = true;
-            this.spotService.deleteImage(this.thumbnail.path).then(() => {
+            this.spotService.updateSpot(this.resourceForm.get('uid')?.value, { thumbnail: response, pictures: this.previews }).then(() => {
                 this.disabled = false;
-                console.log(this.previews)
             }).catch((error) => {
+                this.disabled = false;
                 this.sharedService.notify("An error occurred, try again later!", 4000);
-                console.log(error)
-            })
+            });
         }).catch((error) => {
             this.disabled = false;
             this.sharedService.notify("An error occurred, try again later!", 4000);
-            //console.log(error);
         });
     }
 }

@@ -1,7 +1,7 @@
 <div *ngIf="disabled" class="loader-container">
     <mat-spinner ></mat-spinner>
 </div>
-<div fxLayout="row wrap" class="spotEdit">
+<div fxLayout="row wrap" *ngIf="start" class="spotEdit">
     <div fxFlex.gt-md="100"  fxFlex="100">
         <div fxLayout="row wrap">
             <!-- <div fxFlex="50" style="text-align: left; padding: 10px 10px 0 10px;">

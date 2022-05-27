@@ -10,9 +10,6 @@ const routes: Routes = [
   {
     path: 'spot',loadChildren: () => import('./pages/spot/spot.module').then(m => m.SpotModule)
   },
-  // {
-  //   path: 'cam',loadChildren: () => import('./pages/cam/cam.module').then(m => m.CamModule)
-  // },
   {
     path: 'skater',loadChildren: () => import('./pages/skaters/skaters.module').then(m => m.SkatersModule)
   },

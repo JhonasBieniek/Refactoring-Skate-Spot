@@ -1,4 +1,3 @@
-import { arrayUnion, arrayRemove } from 'firebase/firestore';
 import { sendData } from './../shared/services/sendData.service';
 import { receiveData } from './../shared/services/receiveData.service';
 import { NavbarService } from '../../../shared/services/navbar.service';
@@ -53,7 +52,7 @@ export class SpotEditComponent extends BaseSpotFormComponent implements OnInit {
     super.ngOnInit()
   }
 
-  protected getData(): any{
+  protected getData(){
     this.spotService.getSpotView(this.route.snapshot.params['id']).then((docSnap) => {
       if (docSnap.exists()) {
         this.currentAction = "edit";
@@ -69,9 +68,6 @@ export class SpotEditComponent extends BaseSpotFormComponent implements OnInit {
     });
   }
 
-  protected spotUpdate(): any{
-    
-  }
-
+  //GUARDAR AS INTENÇÕES DO USUARIO E OS VALORES DAS INTENÇÕES E NO SAVE APENAS EXECUTAR, PARA QUE NÃO HAJA CONFLITO DE EXECUÇÃO.
 
 }

@@ -322,7 +322,7 @@ export class NavbarComponent {
     }
   }
 
-  save(event: MouseEvent){
+   save(event: MouseEvent){
     event.stopPropagation();
     this.clickEvent = true;
     this.sharedService.sendClickEvent();
