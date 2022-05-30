@@ -18,7 +18,7 @@ export class AppComponent {
           this.urls = ['/'];
           localStorage.removeItem('spotValue')
           localStorage.removeItem('spotImages')
-          localStorage.removeItem('spotGeolocation')
+          localStorage.removeItem('spotThumbnail')
           localStorage.removeItem('spotCreating')
         }
         if(this.urls.length > 0){

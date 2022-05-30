@@ -1,6 +1,6 @@
 import { NgxImageCompressService, DataUrl } from 'ngx-image-compress';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { imagePreview } from '../../spot.component';
+import { imagePreview } from '../models/imagePreview.model';
 import { Injectable } from '@angular/core';
 import { collection, addDoc, orderBy, query, startAt, endAt, getDocs, CollectionReference, where, setDoc,doc, getDoc, updateDoc, DocumentReference, collectionGroup } from "firebase/firestore";
 import { getFirestore } from 'firebase/firestore'

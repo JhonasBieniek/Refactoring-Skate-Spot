@@ -1,5 +1,5 @@
 import { receiveData } from './../../spot/shared/services/receiveData.service';
-import { GeolocationAndConfig } from '../../../shared/services/geolocation-config.service';
+import { GeolocationAndConfig } from '../../../shared/services/geolocationAndConfig.service';
 import { Component, ElementRef, OnInit, QueryList, ViewChild, ViewChildren, ViewEncapsulation } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { FormBuilder } from '@angular/forms';

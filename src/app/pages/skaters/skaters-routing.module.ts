@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { AuthGuard } from 'src/app/core/guards/auth.guard';
+import { AuthGuard } from 'src/app/shared/guards/auth.guard';
 import { FriendListComponent } from './friend-list/friend-list.component';
 import { SkaterViewComponent } from './skater-view/skater-view.component';
 import { SkaterComponent } from './skater/skater.component';

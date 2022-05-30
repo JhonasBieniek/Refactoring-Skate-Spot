@@ -2,8 +2,8 @@ import { Injectable, ViewChild } from '@angular/core';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { ActivatedRouteSnapshot, CanActivate, Router, RouterStateSnapshot, UrlTree } from '@angular/router';
 import { Observable } from 'rxjs';
-import { SigninComponent } from '../components/signin/signin.component';
-import { AuthService } from '../../shared/services/auth.service';
+import { SigninComponent } from '../../core/components/signin/signin.component';
+import { AuthService } from '../services/auth.service';
 import { SharedService } from 'src/app/shared/services/shared.service';
 
 @Injectable({

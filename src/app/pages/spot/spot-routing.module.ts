@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { AuthGuard } from 'src/app/core/guards/auth.guard';
+import { AuthGuard } from 'src/app/shared/guards/auth.guard';
 import { SpotEditComponent } from './spot-edit/spot-edit.component';
 import { SpotViewComponent } from './spot-view/spot-view.component';
 import { SpotComponent } from './spot.component';

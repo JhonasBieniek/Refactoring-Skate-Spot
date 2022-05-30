@@ -1,5 +1,5 @@
 import { receiveData } from '../../pages/spot/shared/services/receiveData.service';
-import { InitializeAndPosition } from './initializer-position.service';
+import { InitializeAndPosition } from './startAndPosition.service';
 import { QueryDocumentSnapshot, QuerySnapshot } from 'firebase/firestore';
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';

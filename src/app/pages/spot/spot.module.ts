@@ -1,3 +1,4 @@
+import { BaseSpotFormComponent } from 'src/app/pages/spot/shared/components/base-spot-form/base-spot-form.component';
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatFormFieldModule } from '@angular/material/form-field';
