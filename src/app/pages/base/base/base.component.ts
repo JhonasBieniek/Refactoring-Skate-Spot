@@ -26,8 +26,8 @@ export interface conditions {
 @Component({
   selector: 'app-base',
   templateUrl: './base.component.html',
-  styleUrls: ['./base.component.scss'],
-  encapsulation: ViewEncapsulation.None,
+  styleUrls: ['./base.component.scss']
+  // encapsulation: ViewEncapsulation.None,
 })
 export class BaseComponent extends GeolocationAndConfig implements OnInit {
   @ViewChild(MapInfoWindow, { static: false }) info!: MapInfoWindow;

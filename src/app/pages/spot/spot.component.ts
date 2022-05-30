@@ -49,7 +49,7 @@ export class SpotComponent extends BaseSpotFormComponent implements OnInit {
     if (this.clickEventSubscription) this.clickEventSubscription.unsubscribe();
     localStorage.setItem('spotValue', JSON.stringify(this.resourceForm?.value != undefined ? this.resourceForm.value : null));
     localStorage.setItem('spotImages', JSON.stringify(this.previews));
-    localStorage.setItem('spotThumbnail', JSON.stringify(this.thumbnail))
+    if(this.thumbnail !== undefined) localStorage.setItem('spotThumbnail', JSON.stringify(this.thumbnail))
     localStorage.setItem('spotCreating', 'true');
   }
 
@@ -64,7 +64,7 @@ export class SpotComponent extends BaseSpotFormComponent implements OnInit {
         resolve(history.state.data);
       } else if (localStorage.getItem('spotCreating') == "true") {
         this.previews = JSON.parse(localStorage.getItem('spotImages') || '{}')
-        this.thumbnail = JSON.parse(localStorage.getItem('spotThumbnail') || '{}')
+        if(this.thumbnail === undefined) this.thumbnail = JSON.parse(localStorage.getItem('spotThumbnail') || '{}')
         resolve(JSON.parse(localStorage.getItem('spotValue') || '{}'));
       } else {
         this.router.navigate(['/']);
@@ -73,7 +73,7 @@ export class SpotComponent extends BaseSpotFormComponent implements OnInit {
   }
 
   protected makeNewCover(index: any): any {
-    this.ngxCompressThumb(this.previews[index].downloadURL, this.previews[index].name, this.previews[index].orientation);
+
   }
 
   protected save(): void {
@@ -83,6 +83,8 @@ export class SpotComponent extends BaseSpotFormComponent implements OnInit {
       this.resourceForm.get('status')?.setValue('active')
       this.resourceForm.get('created')?.setValue(new Date())
       this.resourceForm.get('modified')?.setValue(new Date())
+      console.log(this.previews)
+      console.log(this.thumbnail)
       this.spotService.createSpot(this.resourceForm.value, this.previews, this.thumbnail).then((response) => {
         //ADDMODERATION ESTA DANDO PROBLEMAS AO INSERIR UM SPOT COM OS DADOS DO LOCALSTORAGE DEPOIS DE RECARREGAR A PAGINA
         this.sendData.addModeration(response.uid, this.resourceForm.get('name')?.value, 'created', this.user.uid, this.resourceForm.get('address.country')?.value, this.user.displayName);
@@ -106,8 +108,8 @@ export class SpotComponent extends BaseSpotFormComponent implements OnInit {
             state: {
               data: {
                 spot_uid: response.uid,
-                lat: this.data.lat,
-                lng: this.data.lng
+                lat: this.resourceForm.get('lat')?.value,
+                lng: this.resourceForm.get('lng')?.value
               }
             }
           });

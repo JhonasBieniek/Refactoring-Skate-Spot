@@ -135,6 +135,7 @@ export abstract class BaseSpotFormComponent implements OnInit {
                 modified: [null]
             })
             this.resourceForm.patchValue(this.data)
+            console.log(this.resourceForm.value)
             if (this.currentAction == "new") {
                 if (this.data.address.point_of_interest != '') {
                     this.resourceForm.get('name')?.setValue('Spot ' + this.data.address.point_of_interest);
@@ -210,7 +211,7 @@ export abstract class BaseSpotFormComponent implements OnInit {
             this.previews[coverIndex].cover = false;
         }
         this.previews[index].cover = true;
-        if (this.currentAction == "new") this.makeNewCover(index)
+        if (this.currentAction == "new") this.ngxCompressThumb(this.previews[index].downloadURL, this.previews[index].name, this.previews[index].orientation);
         if (this.currentAction == "edit") {
             localStorage.setItem('setCoverIndex', JSON.stringify(index))
             localStorage.setItem('changeThumb', 'true')
@@ -257,7 +258,7 @@ export abstract class BaseSpotFormComponent implements OnInit {
                         orientation: orientation,
                         cover: true
                     });
-                    this.ngxCompressThumb(result, name, orientation);
+                    if(this.thumbnail == null) this.ngxCompressThumb(result, name, orientation);
                 } else {
                     this.previews.push({
                         name: name,
@@ -285,31 +286,6 @@ export abstract class BaseSpotFormComponent implements OnInit {
     imageResize(index: number) {
         let gallery = (<HTMLDivElement>document.getElementById("gallery-item-" + index));
         gallery.classList.toggle("full");
-    }
-
-    updatePictures(name: string, file: any, orientation: DOC_ORIENTATION, last: boolean, cover: boolean) {
-        this.imageCompress
-            .compressFile(file, orientation, 60, 45, 1024, 1024)
-            .then((result: DataUrl) => {
-                let path = "spots/" + this.resourceForm.get('uid')?.value + "/" + name + "_" + Date.now() + ".png";
-                this.spotService.uploadImageAsPromise(result, path, orientation, cover).then((response) => {
-                    this.spotService.updateSpot(this.resourceForm.get('uid')?.value, { pictures: arrayUnion(response) }).then((responsePic) => {
-                        if (last == true) {
-                            // this.sendData.addModeration(this.resourceForm.get('uid')?.value, this.resourceForm.get('name')?.value, 'image modified', this.user.uid, this.resourceForm.get('address.country')?.value, this.user.displayName);
-                            this.disabled = false;
-                        }
-                        this.previews.push(response);
-                    }).catch((error) => {
-                        this.disabled = false;
-                        this.sharedService.notify("An error occurred, try again lateeer!", 4000);
-                        console.log(error.message);
-                    });
-                }).catch((error) => {
-                    this.disabled = false;
-                    this.sharedService.notify("An error occurred, try again later!", 4000);
-                    //console.log(error);
-                });
-            });
     }
 
     updateThumbnail(name: string, file: any, orientation: DOC_ORIENTATION, cover_index: number) {
